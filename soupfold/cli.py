@@ -22,7 +22,7 @@ def parser(model, soupfold=True):
     ap.add_argument("--out", default=None, help="override the output directory")
     ap.add_argument("--repr-root", default=None, help="default <workdir>/reprs")
     if soupfold:
-        ap.add_argument("--teachers", default=None, help="default: the other three models")
+        ap.add_argument("--peers", default=None, help="default: the other three models")
         ap.add_argument("--layouts", default=None, help="default <workdir>/layouts")
         ap.add_argument("--weights", default=WEIGHTS)
     return ap
@@ -40,7 +40,7 @@ def finish(a, model, steps):
     a.out = a.out or out_dir(a.workdir, model, a.mode, a.sample, a.seed)
     a.repr_root = a.repr_root or os.path.join(a.workdir, "reprs")
     if a.mode == "soupfold":
-        a.teachers = a.teachers.split(",") if a.teachers else [m for m in MODELS if m != model]
+        a.peers = a.peers.split(",") if a.peers else [m for m in MODELS if m != model]
         a.layouts = a.layouts or os.path.join(a.workdir, "layouts")
     os.makedirs(a.out, exist_ok=True)
     return a

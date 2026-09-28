@@ -1,7 +1,7 @@
-"""Teacher -> base maps f_{t->b}: a per-entry MLP on pair-representation channels.
+"""Peer -> anchor maps f_{p->a}: a per-entry MLP on pair-representation channels.
 
-Each map takes a teacher's pair representation (normalised per channel with the
-teacher's statistics) and predicts the base model's pair representation in the base's
+Each map takes a peer's pair representation (normalised per channel with the
+peer's statistics) and predicts the anchor model's pair representation in the anchor's
 normalised space. It acts on every (i, j) entry independently, so it translates between
 representation spaces without moving information between token pairs.
 
@@ -25,9 +25,9 @@ class PairMap(nn.Module):
         return self.net(z)
 
 
-def load_map(weights_dir, teacher, base, device="cuda"):
-    """weights/maps/<teacher>_to_<base>.pt -> PairMap in eval mode."""
-    ck = torch.load(os.path.join(weights_dir, "maps", f"{teacher}_to_{base}.pt"),
+def load_map(weights_dir, peer, anchor, device="cuda"):
+    """weights/maps/<peer>_to_<anchor>.pt -> PairMap in eval mode."""
+    ck = torch.load(os.path.join(weights_dir, "maps", f"{peer}_to_{anchor}.pt"),
                     map_location="cpu", weights_only=True)
     net = PairMap(ck["c_in"], ck["c_out"], ck["hidden"])
     net.load_state_dict(ck["state_dict"])

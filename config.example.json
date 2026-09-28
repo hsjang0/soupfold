@@ -18,7 +18,7 @@
     "python": "/path/to/esmfold2_env/bin/python",
     "args": ["--ckpt", "/path/to/esmfold2", "--esmc", "/path/to/esmc-6b"]
   },
-  "template_mmcif_dir": "./examples/9y0a/mmcif",
+  "template_mmcif_dir": "./examples/9mnb/mmcif",
   "release_dates": "/path/to/protenix_root/common/release_date_cache.json",
   "obsolete_pdbs": "/path/to/protenix_root/common/obsolete_to_successor.json",
   "kalign": "/path/to/kalign"

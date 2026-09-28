@@ -1,11 +1,11 @@
-"""AlphaFold3 (teacher only): native run that stores the trunk representation.
+"""AlphaFold3 (peer only): native run that stores the trunk representation.
 
 Builds the AF3 input from the same Protenix-format JSON: unpaired MSA = paired rows prepended to the
 unpaired a3m (deduplicated), templates = AF3's parse of the hmmsearch a3m against the local mmCIF
 store (cutoff 2021-09-30, at most 4). Stores z = pair_embeddings, s = single_embeddings in
 <workdir>/reprs/af3/seed_<k>/.
 
-  python scripts/run_af3.py --input examples/9y0a/9y0a.json --model-dir <af3> --template-mmcif-dir <mmcif>
+  python scripts/run_af3.py --input examples/9mnb/9mnb.json --model-dir <af3> --template-mmcif-dir <mmcif>
 
 Run with AlphaFold3 v3.0.1 on PYTHONPATH (repo root and src/), with the atom_layout patch applied.
 """

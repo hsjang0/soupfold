@@ -1,14 +1,14 @@
-"""SoupFold pipeline: native runs of all four models, token layouts, then SoupFold for each base.
+"""SoupFold pipeline: native runs of all four models, token layouts, then SoupFold for each anchor.
 
-  python scripts/soupfold.py --config config.json --input examples/9y0a/9y0a.json
-  python scripts/soupfold.py --config config.json --input examples/9y0a/9y0a.json --seeds 1-5 --sample
+  python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json
+  python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --seeds 1-5 --sample
 
 Each model runs in its own environment (see config.example.json). Outputs under --workdir:
   reprs/<model>/seed_<k>/             trunk representations
   logs/<model>/seed_<k>/              native runs without --sample (1 sample, 2 steps)
   samples/standalone/<model>/seed_<k> native runs with --sample (5 samples, default steps)
   layouts/<model>/                    token layouts
-  samples/soupfold/<base>/seed_<k>/   SoupFold results (5 samples, default steps)
+  samples/soupfold/<anchor>/seed_<k>/ SoupFold results (5 samples, default steps)
   logs/run/                           stdout of every step
 """
 import argparse
@@ -66,7 +66,7 @@ def main():
     ap.add_argument("--input", nargs="+", required=True, help="Protenix-format system JSON(s)")
     ap.add_argument("--workdir", default="soupfold_out")
     ap.add_argument("--seeds", default="1", help="e.g. 1 or 1-5")
-    ap.add_argument("--bases", default="protenix,opendde,esmfold2")
+    ap.add_argument("--anchors", default="protenix,opendde,esmfold2")
     ap.add_argument("--sample", action="store_true", help="native runs also sample real structures")
     a = ap.parse_args()
     cfg = load_config(a.config)
@@ -90,7 +90,7 @@ def main():
                               "--out", os.path.join(W, "layouts")], f"{L}/layout_{m}.log")
 
     for k in ks:                                  # 3. SoupFold
-        for b in a.bases.split(","):
+        for b in a.anchors.split(","):
             run(cfg, b, [SCRIPT[b], "--mode", "soupfold", "--seed", str(k), "--input", *inp, "--workdir", W,
                          *extra[b]], f"{L}/soupfold_{b}_seed{k}.log")
     print(f"[soupfold] done. SoupFold samples in {W}/samples/soupfold/", flush=True)

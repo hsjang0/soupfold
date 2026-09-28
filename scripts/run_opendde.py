@@ -1,6 +1,6 @@
 """OpenDDE: same code path and flags as scripts/run_protenix.py, plus --checkpoint.
 
-  python scripts/run_opendde.py --mode native --input examples/9y0a/9y0a.json --checkpoint <opendde.pt> <data flags>
+  python scripts/run_opendde.py --mode native --input examples/9mnb/9mnb.json --checkpoint <opendde.pt> <data flags>
 """
 import os
 import sys

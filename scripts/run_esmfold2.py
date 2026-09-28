@@ -2,14 +2,15 @@
 
   native    trunk seeded by --seed (ESMC-embedding dropout 0.3, MSA column masking 0.1 give per-seed
             diversity), z stored in <workdir>/reprs/esmfold2/seed_<k>/, then diffusion from that z.
-  soupfold  no trunk. Mixes this model's stored z with the teachers' stored z (same seed), then runs
+  soupfold  no trunk. Mixes this model's stored z with the peers' stored z (same seed), then runs
             diffusion from z'.
 
-  python scripts/run_esmfold2.py --mode native   --input examples/9y0a/9y0a.json --ckpt <esmfold2> --esmc <esmc>
-  python scripts/run_esmfold2.py --mode soupfold --input examples/9y0a/9y0a.json --ckpt <esmfold2> --esmc <esmc>
+  python scripts/run_esmfold2.py --mode native   --input examples/9mnb/9mnb.json --ckpt <esmfold2> --esmc <esmc>
+  python scripts/run_esmfold2.py --mode soupfold --input examples/9mnb/9mnb.json --ckpt <esmfold2> --esmc <esmc>
 
 Run in an esm 3.4.0 environment (unmodified).
 """
+import gc
 import json
 import os
 import sys
@@ -147,17 +148,35 @@ def main():
         else:
             z0 = torch.from_numpy(reprs.load(a.repr_root, "esmfold2", a.seed, sid)[0]).to(device)
             stats = json.load(open(os.path.join(a.weights, "chan_stats.json")))
-            zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.teachers}
-            fmap = {t: M.load_map(a.weights, t, "esmfold2", device) for t in a.teachers}
+            zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.peers}
+            fmap = {t: M.load_map(a.weights, t, "esmfold2", device) for t in a.peers}
             lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
-            tmaps = {t: tokens.align(lay("esmfold2"), lay(t)) for t in a.teachers}
+            tmaps = {t: tokens.align(lay("esmfold2"), lay(t)) for t in a.peers}
             z = mix.soup(z0, zt, fmap, stats, "esmfold2", token_maps=tmaps, device=device)[None]
-        with torch.no_grad(), H.trunk_bypass(model, z), H.seed_diffusion(model, a.seed):
-            out = model(**feats, **common, num_diffusion_samples=a.samples)
-        res = builder.decode(out, feats, chains, num_diffusion_samples=a.samples, complex_id=sid)
-        conf = write(a.out, sid, res if isinstance(res, list) else [res])
+        # A large system can OOM with all samples in one batch. The batch is then halved and the
+        # samples are collected over passes, pass i seeded with seed + i.
+        res, cur, si = [], a.samples, 0
+        while len(res) < a.samples:
+            b = min(cur, a.samples - len(res))
+            try:
+                with torch.no_grad(), H.trunk_bypass(model, z), H.seed_diffusion(model, a.seed + si):
+                    out = model(**feats, **common, num_diffusion_samples=b)
+            except torch.cuda.OutOfMemoryError:
+                out = None
+                gc.collect(); torch.cuda.empty_cache()
+                if cur == 1:
+                    raise
+                cur //= 2
+                print(f"{sid} OOM, batch -> {cur}", flush=True)
+                continue
+            r = builder.decode(out, feats, chains, num_diffusion_samples=b, complex_id=sid)
+            res += r if isinstance(r, list) else [r]
+            si += 1
+            out = None
+            gc.collect(); torch.cuda.empty_cache()
+        conf = write(a.out, sid, res)
         print(f"{sid} [esmfold2 {a.mode} seed {a.seed}] iptm {[round(c, 4) for c in conf]} -> {a.out}", flush=True)
-        out = res = None
+        res = None
         torch.cuda.empty_cache()
 
 

@@ -2,11 +2,11 @@
 OpenDDE runs through this same code via scripts/run_opendde.py.
 
   native    MSA + templates -> trunk -> diffusion. Stores (s, z) in <workdir>/reprs/<model>/seed_<k>/.
-  soupfold  no trunk. Mixes this model's stored z with the teachers' stored z (same seed), then runs
+  soupfold  no trunk. Mixes this model's stored z with the peers' stored z (same seed), then runs
             diffusion and confidence from (s, z').
 
-  python scripts/run_protenix.py --mode native   --input examples/9y0a/9y0a.json <data flags>
-  python scripts/run_protenix.py --mode soupfold --input examples/9y0a/9y0a.json <data flags>
+  python scripts/run_protenix.py --mode native   --input examples/9mnb/9mnb.json <data flags>
+  python scripts/run_protenix.py --mode soupfold --input examples/9mnb/9mnb.json <data flags>
 
 Run in the Protenix 2.0.0 (or OpenDDE 1.1.0) environment with the parser patch applied.
 """
@@ -55,6 +55,8 @@ def build_runner(a):
     t.fetch_remote = False
     if a.model == "opendde":
         t.kalign_binary_path = a.kalign
+        if a.chunk_thresholds:                 # smaller trunk chunks for GPUs under ~180 GB, same numerics
+            c.infer_setting.chunk_size_thresholds = json.loads(a.chunk_thresholds)
     c.dump_dir = a.out
     runner.dumper.base_dir = a.out
     return runner, seed_everything, to_device, get_inference_dataloader, update_inference_configs
@@ -90,10 +92,10 @@ def soup_inputs(a, sid, device):
     z, s = reprs.load(a.repr_root, a.model, a.seed, sid)
     s, z = torch.from_numpy(s).to(device), torch.from_numpy(z).to(device)
     stats = json.load(open(os.path.join(a.weights, "chan_stats.json")))
-    zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.teachers}
-    fmap = {t: M.load_map(a.weights, t, a.model, device) for t in a.teachers}
+    zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.peers}
+    fmap = {t: M.load_map(a.weights, t, a.model, device) for t in a.peers}
     lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
-    tmaps = {t: tokens.align(lay(a.model), lay(t)) for t in a.teachers}
+    tmaps = {t: tokens.align(lay(a.model), lay(t)) for t in a.peers}
     return s, mix.soup(z, zt, fmap, stats, a.model, token_maps=tmaps, device=device)
 
 
@@ -102,6 +104,7 @@ def main(model="protenix"):
     ap = cli.parser(model)
     if model == "opendde":
         ap.add_argument("--checkpoint", required=True, help="OpenDDE checkpoint (opendde.pt)")
+        ap.add_argument("--chunk-thresholds", help='trunk chunk sizes by token count, e.g. \'{"1024":64,"2048":16}\'')
     ap.add_argument("--template-mmcif-dir", required=True)
     ap.add_argument("--release-dates", required=True, help="release_date_cache.json (Protenix common data)")
     ap.add_argument("--obsolete-pdbs", required=True, help="obsolete_to_successor.json (Protenix common data)")

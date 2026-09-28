@@ -48,9 +48,9 @@ def save_layout(cif_path, out_json):
     json.dump(layout(cif_path), open(out_json, "w"))
 
 
-def align(base_rows, teacher_rows):
-    """(idx_base, idx_teacher): tokens present in both models, in corresponding order."""
-    kb, kt = fingerprint(base_rows), fingerprint(teacher_rows)
+def align(anchor_rows, peer_rows):
+    """(idx_anchor, idx_peer): tokens present in both models, in corresponding order."""
+    kb, kt = fingerprint(anchor_rows), fingerprint(peer_rows)
     tpos = {k: j for j, k in enumerate(kt)}
     pairs = [(i, tpos[k]) for i, k in enumerate(kb) if k in tpos]
     ib = np.asarray([i for i, _ in pairs], dtype=np.int64)
