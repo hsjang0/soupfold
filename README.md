@@ -149,3 +149,19 @@ Large complexes can exceed GPU memory.
   year    = {2026}
 }
 ```
+
+## License
+
+SoupFold runs the co-folding models below. Each model is used under its own license.
+
+| model | code | parameters |
+|---|---|---|
+| AlphaFold3 | [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LICENSE) | [AlphaFold 3 Model Parameters Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) |
+| Protenix | [Apache-2.0](https://github.com/bytedance/Protenix/blob/main/LICENSE) | Apache-2.0 |
+| OpenDDE | [Apache-2.0](https://github.com/aurekaresearch/OpenDDE/blob/main/LICENSE) | Apache-2.0 |
+| ESMFold2 | [MIT](https://github.com/Biohub/esm) | MIT (ESMFold2), MIT and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
+
+AlphaFold 3 is used in this work for non-commercial research only, and this work does not train a new
+model similar to AlphaFold 3. Files derived from AlphaFold 3 (`patches/af3_atom_layout.diff`,
+`weights/maps/af3_to_*.pt`, `samples/best_conf/9mnb/af3.cif`) remain subject to the AlphaFold 3 terms,
+including the [Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md).
