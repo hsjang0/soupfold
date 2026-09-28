@@ -1,0 +1,57 @@
+{
+ "af3": {
+  "seed": 3,
+  "sample": 3,
+  "confidence": 0.4782,
+  "dockq": {
+   "A-B": 0.901,
+   "B-C": 0.765,
+   "B-D": 0.019,
+   "B-E": 0.008
+  }
+ },
+ "protenix": {
+  "seed": 4,
+  "sample": 0,
+  "confidence": 0.347,
+  "dockq": {
+   "A-B": 0.014,
+   "B-C": 0.004,
+   "B-D": 0.137,
+   "B-E": 0.005
+  }
+ },
+ "opendde": {
+  "seed": 2,
+  "sample": 0,
+  "confidence": 0.5205,
+  "dockq": {
+   "A-B": 0.864,
+   "B-C": 0.764,
+   "B-D": 0.006,
+   "B-E": 0.006
+  }
+ },
+ "esmfold2": {
+  "seed": 1,
+  "sample": 2,
+  "confidence": 0.5115,
+  "dockq": {
+   "A-B": 0.011,
+   "B-C": 0.007,
+   "B-D": 0.658,
+   "B-E": 0.798
+  }
+ },
+ "opendde_soupfold": {
+  "seed": 3,
+  "sample": 0,
+  "confidence": 0.4293,
+  "dockq": {
+   "A-B": 0.832,
+   "B-C": 0.765,
+   "B-D": 0.708,
+   "B-E": 0.755
+  }
+ }
+}

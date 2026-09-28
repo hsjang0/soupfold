@@ -1,0 +1,61 @@
+[
+ {
+  "name": "9mnb",
+  "sequences": [
+   {
+    "proteinChain": {
+     "sequence": "DIQMTQSPSSLSASVGDRVTITCQSIKSVYNNRLGWYQQKPGKAPKLLIYETSILTSGVPSRFSGSGSGTDFTLTISSLQPEDFATYYCAGGFDRSGDTTFGQGTKVEIKRTVAAPSVFIFPPSDEQLKSGTASVVCLLNNFYPREAKVQWKVDNALQSGNSQESVTEQDSKDSTYSLSSTLTLSKADYEKHKVYACEVTHQGLSSPVTKSFNRGE",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain1_unpaired.a3m",
+     "pairedMsaPath": "msa/chain1_paired.a3m",
+     "templatesPath": "templates/chain1_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "IVGGQEAPRSKWPWQVSLRVHGPYWMHFCGGSLIHPQWVLTAAHCVGPDVKDLAALRVQLREQHLYYQDQLLPVSRIIVHPQFYTAQIGADIALLELEEPVNVSSHVHTVTLPPASETFPPGMPCWVTGWGDVDNDERLPPPFPLKQVKVPIMENHICDAKYHLGAYTGDDVRIVRDDMLCAGNTRRDSCQGDSGGPLVCKVNGTWLQAGVVSWGEGCAQPNRPGIYTRVTYYLDWIHHYVPKKP",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain2_unpaired.a3m",
+     "pairedMsaPath": "msa/chain2_paired.a3m",
+     "templatesPath": "templates/chain2_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "VQLVESGPGLVKPSETLSLTCTVSRFSLIGYAITWIRQPPGKGLEWIGGISSAATTFYSSWAKSRVTISRDTSKNQVSLKLSSVTAADTAVYYCARDPRGYGAALDRLDLWGQGTLVTVSSASTKGPSVFPLAPSSKSTSGGTAALGCLVKDYFPEPVTVSWNSGALTSGVHTFPAVLQSSGLYSLSSVVTVPSSSLGTQTYICNVNHKPSNTKVDKKVEP",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain3_unpaired.a3m",
+     "pairedMsaPath": "msa/chain3_paired.a3m",
+     "templatesPath": "templates/chain3_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "DIVMTQTPASVSEPVGGTVTIKCQASQSIVSNYLNWYQQKPGQPPKLLIYQASKLASGVPSRFKGSGSGTEYTLTISDLEAADAATYYCQSTDDSSVTAIYDITFGGGTKVEIKRTVAAPSVFIFPPSDEQLKSGTASVVCLLNNFYPREAKVQWKVDNALQSGNSQESVTEQDSKDSTYSLSSTLTLSKADYEKHKVYACEVTHAGLSSPVTKSFNGEC",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain4_unpaired.a3m",
+     "pairedMsaPath": "msa/chain4_paired.a3m",
+     "templatesPath": "templates/chain4_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "SVEESRGGLIKPTDTLTLTCTVSGFSLSSYDMNWVRQAPGKELEWIGYISYGGSTNYASWAKRRATITRNTNENTVTLKVTSLTAADTATYFCARFDYPTATLDIWGPGTLVTVSSASTKGPSVFPLAPSSKSTSGGTAALGCLVKDYFPEPVTVSWNSGALTSGVHTFPAVLQSSGLYSLSSVVTVPSSSLGTQTYICNVNHKPSNTKVDKKVEP",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain5_unpaired.a3m",
+     "pairedMsaPath": "msa/chain5_paired.a3m",
+     "templatesPath": "templates/chain5_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain6_unpaired.a3m",
+     "pairedMsaPath": "msa/chain6_paired.a3m",
+     "templatesPath": "templates/chain6_hmmsearch.a3m"
+    }
+   }
+  ]
+ }
+]

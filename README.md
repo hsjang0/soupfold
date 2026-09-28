@@ -24,7 +24,8 @@ Representations are captured and injected at runtime by `soupfold/hooks/`, witho
 ## Input
 
 One Protenix-format JSON per system, shared by all models. Paths are relative to the JSON file.
-`examples/9y0a/` is a ready-to-run ARK-AB example (antibody Fab with its antigen).
+`examples/` has two ready-to-run ARK-AB systems: `9y0a` (Fab with its antigen) and `9mnb`
+(two Fabs on one antigen).
 
 ```json
 [{"name": "9y0a", "sequences": [
@@ -52,6 +53,8 @@ SoupFold with Protenix, OpenDDE and ESMFold2 as base. Outputs go under `--workdi
 | `reprs/`, `layouts/`, `logs/run/` | representations, token layouts, step logs |
 
 `samples/` holds our outputs for `examples/9y0a` (seeds 1-5) in the same layout.
+`samples/best_conf/9mnb/` holds the top-ranked of 25 samples of each native model and of OpenDDE+SoupFold,
+with DockQ in `summary.json`. Each native model docks only one of the two Fabs, SoupFold docks both.
 
 `--seeds 1-5 --sample` reproduces the paper setting. We report the top-ranked structure by the base
 model's confidence.
