@@ -4,9 +4,6 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2609.15552-b31b1b.svg)](https://arxiv.org/abs/2609.15552)
 
-Official code for **Co-folding with a Soup of Representations**
-(Hyosoon Jang, Taewon Kim, Sungsoo Ahn), [arXiv:2609.15552](https://arxiv.org/abs/2609.15552).
-
 ## Abstract
 
 Co-folding models such as AlphaFold3, Protenix, ESMFold2, and OpenDDE have advanced rapidly, yet no single model consistently performs best across all biomolecular complexes. In this paper, we show that their pair representations encode complementary information that can be transferred across models to improve structure prediction. We introduce SoupFold, which combines pair representations from multiple co-folding models in a common representation space and generates structures from the combined representation. Importantly, SoupFold does not retrain the co-folding models and learns only simple mappings to transfer representations across models. We evaluate SoupFold on antibody-antigen, protein-protein, protein-ligand, molecular glue, GPCR, and oligomeric complex prediction using AlphaFold3, Protenix, ESMFold2, and OpenDDE. By combining representations across models, SoupFold improves over individual co-folding models across the considered benchmarks.
@@ -42,7 +39,7 @@ Each model runs in its own Python environment. SoupFold does not ship or modify 
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
 > **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). We remove the two
-> known differences with the patches in `patches/`, so every token is mixed. They do not affect the results.
+> known differences with the patches in `patches/`, so every token is mixed. The effect is minor and the patches are optional.
 > Patches: `patches/protenix_parser.diff` (Protenix), `patches/opendde_parser.diff` (OpenDDE), `patches/af3_atom_layout.diff` (AlphaFold3).
 
 ## Input
