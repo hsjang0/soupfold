@@ -157,9 +157,9 @@ SoupFold runs the co-folding models below. Each model is used under its own lice
 | model | code | parameters |
 |---|---|---|
 | AlphaFold3 | [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LICENSE) | [AlphaFold 3 Model Parameters Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) |
-| Protenix | [Apache-2.0](https://github.com/bytedance/Protenix/blob/main/LICENSE) | Apache-2.0 |
-| OpenDDE | [Apache-2.0](https://github.com/aurekaresearch/OpenDDE/blob/main/LICENSE) | Apache-2.0 |
-| ESMFold2 | [MIT](https://github.com/Biohub/esm) | MIT (ESMFold2), MIT and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
+| Protenix | [Apache-2.0](https://github.com/bytedance/Protenix/blob/main/LICENSE) | [Apache-2.0](https://github.com/bytedance/Protenix/blob/main/LICENSE) |
+| OpenDDE | [Apache-2.0](https://github.com/aurekaresearch/OpenDDE/blob/main/LICENSE) | [Apache-2.0](https://huggingface.co/aurekaresearch/OpenDDE) |
+| ESMFold2 | [MIT](https://github.com/Biohub/esm) | [MIT](https://huggingface.co/biohub/ESMFold2) (ESMFold2), [MIT](https://huggingface.co/biohub/ESMC-6B) and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
 
 AlphaFold 3 is used in this work for non-commercial research only, and this work does not train a new
 model similar to AlphaFold 3. Files derived from AlphaFold 3 (`patches/af3_atom_layout.diff`,
