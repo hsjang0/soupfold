@@ -10,11 +10,10 @@
 
 ## How it works
 
-SoupFold improves a co-folding model by letting it borrow what other co-folding models see.
-One model is the **anchor**. It folds the complex as usual up to its trunk, and its trunk pair
-representation is then averaged with those of the other models, the **peers**. Each peer
-representation is first translated into the anchor's space by a small learned map. The anchor
-then runs its own diffusion and confidence heads on the averaged representation.
+SoupFold improves a co-folding model by combining its pair representation with those of other models.
+One model serves as the **anchor**, while **peer** representations are mapped into the anchor's space and
+averaged with its representation. The anchor then uses the combined representation for diffusion and
+confidence prediction.
 
 ```math
 H = \frac{w_{m^\star} H^{(m^\star)} + \sum_{m \in \mathcal{M} \setminus \{m^\star\}} w_m \, f_{m \to m^\star}\big(H^{(m)}\big)}{w_{m^\star} + \sum_{m \in \mathcal{M} \setminus \{m^\star\}} w_m}
