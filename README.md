@@ -25,6 +25,14 @@ peer $m$ to the anchor. This code uses equal weights ($w_m = 1$). $H$ is scaled 
 channel statistics before diffusion.
 The maps and channel statistics are in `weights/`.
 
+## Example
+
+<p align="center"><img src="assets/9mnb_example.png" width="100%"></p>
+
+`samples/best_conf/9mnb/` holds, for each standalone model and for OpenDDE+SoupFold, the top-ranked of
+25 samples (seeds 1-5) with DockQ per interface in `summary.json`. AlphaFold3 and OpenDDE dock only
+the first Fab, ESMFold2 only the second, and Protenix neither. SoupFold docks both.
+
 ## Models
 
 | model | code | parameters | role |
@@ -90,14 +98,6 @@ Everything goes under `--workdir` (default `soupfold_out/`):
 | `logs/<model>/seed_<k>/` | standalone runs without `--sample` |
 | `reprs/`, `layouts/` | representations and token layouts |
 | `logs/run/` | the output of every step |
-
-## Example outputs
-
-<p align="center"><img src="assets/9mnb_example.png" width="100%"></p>
-
-`samples/best_conf/9mnb/` holds, for each standalone model and for OpenDDE+SoupFold, the top-ranked of
-25 samples (seeds 1-5) with DockQ per interface in `summary.json`. AlphaFold3 and OpenDDE dock only
-the first Fab, ESMFold2 only the second, and Protenix neither. SoupFold docks both.
 
 ## Running steps individually
 
