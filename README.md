@@ -42,8 +42,9 @@ Each model runs in its own Python environment. SoupFold does not ship or modify 
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
 > **IMPORTANT NOTE: apply the patches in `patches/` before running.**
-> SoupFold averages representations token by token, so every model must split a complex into the
-> same tokens. Out of the box they disagree in two places, and the patches fix that.
+> SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`) and mixes only the tokens
+> they share. A token that one model splits differently is left out and keeps the anchor's value.
+> The patches remove the two known differences, so every token is mixed.
 >
 > | patch | package | change |
 > |---|---|---|
