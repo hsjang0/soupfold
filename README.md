@@ -19,12 +19,14 @@ representation is then averaged with those of the other models, the **peers**. E
 representation is first translated into the anchor's space by a small learned map. The anchor
 then runs its own diffusion and confidence heads on the averaged representation.
 
-```
-z' = denorm_a( (norm_a(z_a) + sum_p f_{p->a}(norm_p(z_p))) / (1 + P) )
+```math
+H = \frac{w_{m^\star} H^{(m^\star)} + \sum_{m \in \mathcal{M} \setminus \{m^\star\}} w_m \, f_{m \to m^\star}\big(H^{(m)}\big)}{w_{m^\star} + \sum_{m \in \mathcal{M} \setminus \{m^\star\}} w_m}
 ```
 
-`z_a` is the anchor's pair representation, `z_p` a peer's, `f_{p->a}` the map from peer to anchor,
-`norm` a per-channel normalisation and `P` the number of peers. All sources get equal weight.
+$m^\star$ is the anchor and the other models in $\mathcal{M}$ are the peers. $H^{(m)}$ is the pair
+representation of model $m$, normalised per channel, and $f_{m \to m^\star}$ is the learned map from
+peer $m$ to the anchor. This code uses equal weights ($w_m = 1$). $H$ is scaled back to the anchor's
+channel statistics before diffusion.
 The maps and channel statistics are in `weights/`.
 
 ## Models
