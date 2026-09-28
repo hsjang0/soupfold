@@ -1,8 +1,10 @@
 # SoupFold🍲
 
+<p align="center"><img src="assets/overview.png" width="100%"></p>
+
 [![arXiv](https://img.shields.io/badge/arXiv-2609.15552-b31b1b.svg)](https://arxiv.org/abs/2609.15552)
 
-Official code for **Synthesizing State-of-the-Art Structure Predictions from Soup of Co-folding Models**
+Official code for **Co-folding with a Soup of Representations**
 (Hyosoon Jang, Taewon Kim, Sungsoo Ahn), [arXiv:2609.15552](https://arxiv.org/abs/2609.15552).
 
 SoupFold improves a co-folding model by letting it borrow what other co-folding models see.
@@ -142,7 +144,7 @@ of the two Fabs. SoupFold docks both.
 
 ```bibtex
 @article{jang2026soupfold,
-  title   = {Synthesizing State-of-the-Art Structure Predictions from Soup of Co-folding Models},
+  title   = {Co-folding with a Soup of Representations},
   author  = {Jang, Hyosoon and Kim, Taewon and Ahn, Sungsoo},
   journal = {arXiv preprint arXiv:2609.15552},
   year    = {2026}
