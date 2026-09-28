@@ -7,6 +7,12 @@
 Official code for **Co-folding with a Soup of Representations**
 (Hyosoon Jang, Taewon Kim, Sungsoo Ahn), [arXiv:2609.15552](https://arxiv.org/abs/2609.15552).
 
+## Abstract
+
+Co-folding models such as AlphaFold3, Protenix, ESMFold2, and OpenDDE have advanced rapidly, yet no single model consistently performs best across all biomolecular complexes. In this paper, we show that their pair representations encode complementary information that can be transferred across models to improve structure prediction. We introduce SoupFold, which combines pair representations from multiple co-folding models in a common representation space and generates structures from the combined representation. Importantly, SoupFold does not retrain the co-folding models and learns only simple mappings to transfer representations across models. We evaluate SoupFold on antibody-antigen, protein-protein, protein-ligand, molecular glue, GPCR, and oligomeric complex prediction using AlphaFold3, Protenix, ESMFold2, and OpenDDE. By combining representations across models, SoupFold improves over individual co-folding models across the considered benchmarks.
+
+## How it works
+
 SoupFold improves a co-folding model by letting it borrow what other co-folding models see.
 One model is the **anchor**. It folds the complex as usual up to its trunk, and its trunk pair
 representation is then averaged with those of the other models, the **peers**. Each peer
