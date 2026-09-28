@@ -34,7 +34,7 @@ The maps and channel statistics are in `weights/`.
 | OpenDDE | 1.1.0 | anchor, peer |
 | ESMFold2 | esm 3.4.0 | anchor, peer |
 
-Each model runs in its own Python environment. SoupFold does not ship or modify their code.
+Each model runs in its own Python environment.
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
 > **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). We remove the two
