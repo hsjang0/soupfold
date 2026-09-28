@@ -47,9 +47,9 @@ Representations are captured and injected at runtime by `soupfold/hooks/`.
 >
 > | patch | package | change |
 > |---|---|---|
-> | `protenix_parser.diff` | Protenix | An entity declared as ligand or ion is tokenised per atom. Without it a free amino acid ligand (e.g. ILE) becomes a single protein token. |
-> | `opendde_parser.diff` | OpenDDE | Same change as for Protenix. |
-> | `af3_atom_layout.diff` | AlphaFold3 | Keeps the glycan O1 atom, which AF3 drops and the other models keep. |
+> | `protenix_parser.diff` | Protenix | Amino acid ligands (e.g. free ILE) get per-atom tokens, as in AF3. |
+> | `opendde_parser.diff` | OpenDDE | Same as Protenix. |
+> | `af3_atom_layout.diff` | AlphaFold3 | Keeps the glycan O1 atom, as Protenix and OpenDDE do. |
 >
 > ```bash
 > patch -p1 -d <protenix site-packages> < patches/protenix_parser.diff
