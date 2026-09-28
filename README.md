@@ -145,7 +145,8 @@ Large complexes can exceed GPU memory.
 
 ## License
 
-SoupFold fully follows the licenses of its anchor and peer models, listed below.
+The license of SoupFold fully follows the licenses of its anchor and peer models, listed below. Artifacts
+unique to SoupFold (code, transfer networks and example outputs) are also subject to these licenses.
 
 | model | code | parameters |
 |---|---|---|
