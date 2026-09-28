@@ -51,7 +51,7 @@ SoupFold with Protenix, OpenDDE and ESMFold2 as base. Outputs go under `--workdi
 | `logs/<model>/seed_<k>/` | native runs without `--sample` (1 sample, 2 steps) |
 | `reprs/`, `layouts/`, `logs/run/` | representations, token layouts, step logs |
 
-`samples/` holds our seed-1 outputs for `examples/9y0a` in the same layout.
+`samples/` holds our outputs for `examples/9y0a` (seeds 1-5) in the same layout.
 
 `--seeds 1-5 --sample` reproduces the paper setting. We report the top-ranked structure by the base
 model's confidence.
