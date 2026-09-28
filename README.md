@@ -220,10 +220,8 @@ SoupFold fully follows the licenses of its anchor and peer models, listed below.
 | OpenDDE | [Apache-2.0](https://github.com/aurekaresearch/OpenDDE/blob/main/LICENSE) | [Apache-2.0](https://huggingface.co/aurekaresearch/OpenDDE) |
 | ESMFold2 | [MIT](https://github.com/Biohub/esm) | [MIT](https://huggingface.co/biohub/ESMFold2) (ESMFold2), [MIT](https://huggingface.co/biohub/ESMC-6B) and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
 
-AlphaFold 3 is used in this work for non-commercial research only. This work does not train a new model
-similar to AlphaFold 3. It trains only representation transfer networks.
-
-AlphaFold 3 output in this repository, namely the AlphaFold3 panels of the figures and the transfer
-networks trained on AlphaFold 3 representations (`weights/maps/af3_to_*.pt`), is provided under and
-subject to the [AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md).
-`patches/af3_atom_layout.diff` contains AlphaFold 3 source code and is under CC BY-NC-SA 4.0.
+AlphaFold 3 is used for non-commercial research only, as a peer and never as an anchor. This work does not
+train a model similar to AlphaFold 3. It trains only representation transfer networks, none of which maps into
+AlphaFold 3. The AlphaFold3 panels of the figures are subject to the
+[AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md),
+and `patches/af3_atom_layout.diff` contains AlphaFold 3 code under CC BY-NC-SA 4.0.
