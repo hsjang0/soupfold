@@ -27,12 +27,12 @@ The maps and channel statistics are in `weights/`.
 
 ## Models
 
-| model | version | role |
-|---|---|---|
-| AlphaFold3 | v3.0.1 | peer |
-| Protenix | 2.0.0 | anchor, peer |
-| OpenDDE | 1.1.0 | anchor, peer |
-| ESMFold2 | esm 3.4.0 | anchor, peer |
+| model | code | parameters | role |
+|---|---|---|---|
+| AlphaFold3 | v3.0.1 | `af3.bin` (official weights) | peer |
+| Protenix | 2.0.0 | `protenix_base_default_v1.0.0` | anchor, peer |
+| OpenDDE | 1.1.0 | `opendde.pt` ([aurekaresearch/OpenDDE](https://huggingface.co/aurekaresearch/OpenDDE) @ `eddd563`) | anchor, peer |
+| ESMFold2 | esm 3.4.0 | [biohub/ESMFold2](https://huggingface.co/biohub/ESMFold2) @ `8fc3ff4`, [biohub/ESMC-6B](https://huggingface.co/biohub/ESMC-6B) @ `45b0fa5` | anchor, peer |
 
 Each model runs in its own Python environment.
 Representations are captured and injected at runtime by `soupfold/hooks/`.
