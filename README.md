@@ -125,6 +125,8 @@ Large complexes can exceed GPU memory.
 
 ## Example outputs
 
+<p align="center"><img src="assets/9mnb_example.png" width="100%"></p>
+
 `samples/best_conf/9mnb/` holds, for each standalone model and for OpenDDE+SoupFold, the top-ranked of
 25 samples (seeds 1-5) with DockQ per interface in `summary.json`. Each standalone model docks only one
 of the two Fabs. SoupFold docks both.
