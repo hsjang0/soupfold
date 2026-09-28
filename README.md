@@ -41,24 +41,14 @@ The maps and channel statistics are in `weights/`.
 Each model runs in its own Python environment. SoupFold does not ship or modify their code.
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
-> **IMPORTANT NOTE: apply the patches in `patches/` before running.**
-> SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`) and mixes only the tokens
-> they share. A token that one model splits differently is left out and keeps the anchor's value.
-> The patches remove the two known differences, so every token is mixed.
+> **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). The patches in
+> `patches/` remove the two known differences, so every token is mixed. They have little effect on results.
 >
 > | patch | package | change |
 > |---|---|---|
 > | `protenix_parser.diff` | Protenix | Amino acid ligands (e.g. free ILE) get per-atom tokens, as in AF3. |
 > | `opendde_parser.diff` | OpenDDE | Same as Protenix. |
 > | `af3_atom_layout.diff` | AlphaFold3 | Keeps the glycan O1 atom, as Protenix and OpenDDE do. |
->
-> ```bash
-> patch -p1 -d <protenix site-packages> < patches/protenix_parser.diff
-> patch -p1 -d <opendde site-packages>  < patches/opendde_parser.diff
-> patch -p1 -d <alphafold3 repo>        < patches/af3_atom_layout.diff
-> ```
->
-> Proteins without ligands or glycans tokenise identically either way. ESMFold2 needs no patch.
 
 ## Input
 
