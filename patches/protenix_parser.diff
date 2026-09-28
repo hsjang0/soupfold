@@ -1,0 +1,17 @@
+--- a/protenix/data/core/parser.py
++++ b/protenix/data/core/parser.py
+@@ -2563,6 +2563,14 @@
+                 # non-poly is ligand
+                 mol_types[start:stop] = "ligand"
+                 continue
++            # An entity the input declared as ligand or ion is already recorded here
++            # as "non-polymer". Without this, get_mol_type() below reads the CCD's
++            # _chem_comp.type and a free amino acid ligand (ILE, VAL, TRP ...) comes
++            # back "protein", so the tokenizer emits one token for it instead of one
++            # per atom, disagreeing with ESMFold2 and AF3.
++            if sequences[entity_id] == "non-polymer":
++                mol_types[start:stop] = "ligand"
++                continue
+             res_name = atom_array.res_name[start]
+ 
+             mol_types[start:stop] = ccd.get_mol_type(res_name)

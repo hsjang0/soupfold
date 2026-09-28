@@ -1,0 +1,13 @@
+diff --git a/src/alphafold3/model/atom_layout/atom_layout.py b/src/alphafold3/model/atom_layout/atom_layout.py
+index 541fe7f..fb1f1dc 100644
+--- a/src/alphafold3/model/atom_layout/atom_layout.py
++++ b/src/alphafold3/model/atom_layout/atom_layout.py
+@@ -678,7 +678,7 @@ def get_link_drop_atoms(
+         *chemical_component_sets.GLYCAN_LINKING_LIGANDS,
+     }:
+       if 'O1' not in bonded_atoms:
+-        drop_atoms.update({'O1'})
++        pass  # keep glycan O1 so the token count matches Protenix / OpenDDE
+   return drop_atoms
+ 
+ 

@@ -1,0 +1,13 @@
+--- a/opendde/data/core/parser.py
++++ b/opendde/data/core/parser.py
+@@ -1267,6 +1267,10 @@
+                 # non-poly is ligand
+                 mol_types[start:stop] = "ligand"
+                 continue
++            if sequences[entity_id] == "non-polymer":
++                # a free residue declared as ligand/ion tokenises per atom, as in AF3 and the patched Protenix
++                mol_types[start:stop] = "ligand"
++                continue
+             res_name = atom_array.res_name[start]
+ 
+             mol_types[start:stop] = ccd.get_mol_type(res_name)
