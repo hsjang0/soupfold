@@ -157,8 +157,7 @@ SoupFold fully follows the licenses of its anchor and peer models, listed below.
 AlphaFold 3 is used for non-commercial research only, as a peer and never as an anchor. This work does not
 train a model similar to AlphaFold 3. It trains only representation transfer networks, and none of them predicts
 AlphaFold 3 representations. The AlphaFold3 panels of the figures are subject to the
-[AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md),
-and `patches/af3_atom_layout.diff` contains AlphaFold 3 code under CC BY-NC-SA 4.0.
+[AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md).
 
 ## Citation
 
@@ -172,7 +171,9 @@ and `patches/af3_atom_layout.diff` contains AlphaFold 3 code under CC BY-NC-SA 4
 ```
 
 Please also cite the co-folding models SoupFold builds on. Using or distributing AlphaFold 3 output
-requires citing the AlphaFold 3 paper.
+requires citing the AlphaFold 3 paper. The entries below are those given in each model's README. OpenDDE's
+README gives no BibTeX and asks to cite the [software](https://github.com/aurekaresearch/OpenDDE) and its
+[technical report](https://arxiv.org/abs/2607.03787).
 
 ```bibtex
 @article{Abramson2024,
@@ -196,13 +197,6 @@ requires citing the AlphaFold 3 paper.
   URL = {https://www.biorxiv.org/content/early/2026/02/22/2026.02.05.703733.1},
   eprint = {https://www.biorxiv.org/content/early/2026/02/22/2026.02.05.703733.1.full.pdf},
   journal = {bioRxiv}
-}
-
-@article{opendde2026,
-  title   = {Folding, Reasoning, and Scaling with Open-source Drug Discovery Engine},
-  author  = {{Aureka AI OpenDDE project}},
-  journal = {arXiv preprint arXiv:2607.03787},
-  year    = {2026}
 }
 
 @misc{candido2026language,
