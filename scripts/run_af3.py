@@ -22,6 +22,7 @@ from soupfold import cli, inputs, reprs  # noqa: E402
 
 import jax  # noqa: E402
 from absl import flags  # noqa: E402
+import alphafold3.cpp  # noqa: E402
 from alphafold3.common import folding_input  # noqa: E402
 from alphafold3.constants import residue_names  # noqa: E402
 from alphafold3.data import msa_config, structure_stores, templates as af3_templates  # noqa: E402
@@ -136,6 +137,12 @@ def main():
     config.heads.diffusion.eval.steps = a.sampling_steps
     runner = ra.ModelRunner(config=config, device=jax.local_devices()[0], model_dir=pathlib.Path(a.model_dir))
     store = structure_stores.StructureStore(a.template_mmcif_dir)
+    # AF3 output (structures and representations) is subject to the AlphaFold 3 Output Terms of Use.
+    # run_alphafold.py writes them next to its output, and so do we.
+    terms = (pathlib.Path(alphafold3.cpp.__file__).parent / "OUTPUT_TERMS_OF_USE.md").read_text()
+    for d in (a.out, os.path.join(a.repr_root, "af3", f"seed_{a.seed}")):
+        os.makedirs(d, exist_ok=True)
+        open(os.path.join(d, reprs.TERMS), "w").write(terms)
     cutoff = datetime.date.fromisoformat(a.template_cutoff)
     for jpath in a.input:
         rec = inputs.load(jpath)

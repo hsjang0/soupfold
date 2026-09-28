@@ -153,6 +153,8 @@ def main():
             lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
             tmaps = {t: tokens.align(lay("esmfold2"), lay(t)) for t in a.peers}
             z = mix.soup(z0, zt, fmap, stats, "esmfold2", token_maps=tmaps, device=device)[None]
+            if "af3" in a.peers:
+                reprs.copy_terms(a.repr_root, a.seed, a.out)
         # A large system can OOM with all samples in one batch. The batch is then halved and the
         # samples are collected over passes, pass i seeded with seed + i.
         res, cur, si = [], a.samples, 0

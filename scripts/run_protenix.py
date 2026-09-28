@@ -132,6 +132,8 @@ def main(model="protenix"):
                            box["s"].squeeze(0) if box["s"].dim() == 3 else box["s"], recycling=a.recycling)
             else:
                 s, z = soup_inputs(a, sid, runner.device)
+                if "af3" in a.peers:
+                    reprs.copy_terms(a.repr_root, a.seed, a.out)
                 if model == "opendde":                # OpenDDE consumes the trunk output in bf16
                     s, z = s.to(torch.bfloat16), z.to(torch.bfloat16)
                 H.drop_template_features(data["input_feature_dict"])

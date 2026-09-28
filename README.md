@@ -37,8 +37,9 @@ The maps and channel statistics are in `weights/`.
 
 <p align="center"><img src="assets/9mnb_example.png" width="100%"></p>
 
-`samples/best_conf/9mnb/` holds, for each standalone model and for OpenDDE+SoupFold, the top-ranked of
-25 samples (seeds 1-5) with DockQ per interface in `summary.json`. AlphaFold3 and OpenDDE dock only
+`samples/best_conf/9mnb/` holds, for Protenix, OpenDDE, ESMFold2 and OpenDDE+SoupFold, the top-ranked of
+25 samples (seeds 1-5), and `summary.json` gives DockQ per interface for all five, including AlphaFold3.
+The AlphaFold3 structure itself is not redistributed. AlphaFold3 and OpenDDE dock only
 the first Fab, ESMFold2 only the second, and Protenix neither. SoupFold docks both.
 
 ## Models
@@ -107,6 +108,9 @@ Everything goes under `--workdir` (default `soupfold_out/`):
 | `reprs/`, `layouts/` | representations and token layouts |
 | `logs/run/` | the output of every step |
 
+AlphaFold3 output directories, and SoupFold outputs that use AlphaFold3 as a peer, include `TERMS_OF_USE.md`
+(the AlphaFold 3 Output Terms of Use).
+
 ## Running steps individually
 
 Each step can run on its own in the model's environment:
@@ -161,7 +165,10 @@ SoupFold runs the co-folding models below. Each model is used under its own lice
 | OpenDDE | [Apache-2.0](https://github.com/aurekaresearch/OpenDDE/blob/main/LICENSE) | [Apache-2.0](https://huggingface.co/aurekaresearch/OpenDDE) |
 | ESMFold2 | [MIT](https://github.com/Biohub/esm) | [MIT](https://huggingface.co/biohub/ESMFold2) (ESMFold2), [MIT](https://huggingface.co/biohub/ESMC-6B) and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
 
-AlphaFold 3 is used in this work for non-commercial research only, and this work does not train a new
-model similar to AlphaFold 3. Files derived from AlphaFold 3 (`patches/af3_atom_layout.diff`,
-`weights/maps/af3_to_*.pt`, `samples/best_conf/9mnb/af3.cif`) remain subject to the AlphaFold 3 terms,
-including the [Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md).
+AlphaFold 3 is used in this work for non-commercial research only. This work does not train a new model
+similar to AlphaFold 3. It trains only representation transfer networks.
+
+AlphaFold 3 output in this repository, namely the AlphaFold3 panels of the figures and the transfer
+networks trained on AlphaFold 3 representations (`weights/maps/af3_to_*.pt`), is provided under and
+subject to the [AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md).
+`patches/af3_atom_layout.diff` contains AlphaFold 3 source code and is under CC BY-NC-SA 4.0.

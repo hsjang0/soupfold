@@ -25,6 +25,20 @@ def save(root, model, seed, system, z, s=None, **meta):
     return p
 
 
+TERMS = "TERMS_OF_USE.md"
+
+
+def copy_terms(root, seed, out):
+    """AlphaFold 3 Output Terms of Use go with anything derived from AF3 output. run_af3.py
+    writes them next to the AF3 representations, SoupFold runs with AF3 as a peer copy them
+    into their own output directory."""
+    src = os.path.join(root, "af3", f"seed_{seed}", TERMS)
+    if os.path.exists(src):
+        os.makedirs(out, exist_ok=True)
+        with open(src) as f, open(os.path.join(out, TERMS), "w") as g:
+            g.write(f.read())
+
+
 def load(root, model, seed, system):
     """-> (z float32, s float32 or None)."""
     with np.load(path(root, model, seed, system)) as f:
