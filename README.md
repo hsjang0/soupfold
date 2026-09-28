@@ -43,12 +43,7 @@ Representations are captured and injected at runtime by `soupfold/hooks/`.
 
 > **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). The patches in
 > `patches/` remove the two known differences, so every token is mixed. They have little effect on results.
->
-> | patch | package | change |
-> |---|---|---|
-> | `protenix_parser.diff` | Protenix | Amino acid ligands (e.g. free ILE) get per-atom tokens, as in AF3. |
-> | `opendde_parser.diff` | OpenDDE | Same as Protenix. |
-> | `af3_atom_layout.diff` | AlphaFold3 | Keeps the glycan O1 atom, as Protenix and OpenDDE do. |
+> Patches: `patches/protenix_parser.diff` (Protenix), `patches/opendde_parser.diff` (OpenDDE), `patches/af3_atom_layout.diff` (AlphaFold3).
 
 ## Input
 
