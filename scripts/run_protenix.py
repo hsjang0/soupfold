@@ -1,23 +1,18 @@
-"""Protenix: native folding (saving the trunk representation) and SoupFold folding.
+"""Protenix: native run (stores the trunk representation) or SoupFold run.
 OpenDDE runs through this same code via scripts/run_opendde.py.
 
-  native    full model (MSA + templates -> trunk -> diffusion). Writes the samples and the
-            trunk representation (s, z) to <repr-root>/<model>/seed_<seed>/<system>.npz.
-  soupfold  no trunk: loads this model's stored (s, z) and every teacher's stored z for
-            the same seed, mixes z (soupfold.mix.soup), and runs diffusion + confidence
-            from (s, z'). The base model's own s is used unchanged.
+  native    MSA + templates -> trunk -> diffusion. Stores (s, z) in <workdir>/reprs/<model>/seed_<k>/.
+  soupfold  no trunk. Mixes this model's stored z with the teachers' stored z (same seed), then runs
+            diffusion and confidence from (s, z').
 
-  python scripts/run_protenix.py --mode native   --input 8JT6.json --seed 1 ...
-  python scripts/run_protenix.py --mode soupfold --input 8JT6.json --seed 1 \
-         --teachers esmfold2,opendde,af3 --layouts layouts/ ...
+  python scripts/run_protenix.py --mode native   --input examples/9y0a/9y0a.json <data flags>
+  python scripts/run_protenix.py --mode soupfold --input examples/9y0a/9y0a.json <data flags>
 
-Run inside the model's own environment (Protenix 2.0.0 or OpenDDE 1.1.0, with the
-parser patch in patches/ applied). Inputs are Protenix-format JSON (a list holding one
-record, with MSA and template paths), see the README.
+Run in the Protenix 2.0.0 (or OpenDDE 1.1.0) environment with the parser patch applied.
 """
-import argparse
 import copy
 import glob
+import importlib
 import json
 import os
 import shutil
@@ -27,8 +22,7 @@ import numpy as np
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from soupfold import maps as M, mix, reprs, tokens  # noqa: E402
-import importlib  # noqa: E402
+from soupfold import cli, inputs, maps as M, mix, reprs, tokens  # noqa: E402
 
 
 def build_runner(a):
@@ -86,6 +80,7 @@ def flatten(out, sid, seed):
         sc = json.load(open(os.path.join(d, f"{sid}_summary_confidence_sample_{i}.json")))
         detail.append({key: float(sc[key]) for key in ("ranking_score", "iptm", "ptm") if key in sc})
         shutil.copyfile(c, os.path.join(out, f"{sid}__s{k}.cif"))
+    shutil.rmtree(os.path.join(out, sid))
     json.dump({"conf": [x["ranking_score"] for x in detail], "metric": "ranking_score", "detail": detail},
               open(os.path.join(out, f"{sid}__conf.json"), "w"))
     return [x["ranking_score"] for x in detail]
@@ -93,57 +88,32 @@ def flatten(out, sid, seed):
 
 def soup_inputs(a, sid, device):
     z, s = reprs.load(a.repr_root, a.model, a.seed, sid)
-    s = torch.from_numpy(s).to(device)
-    z = torch.from_numpy(z).to(device)
-    if not a.teachers:                        # fold from the stored representation alone
-        return s, z
-    teach = [t for t in a.teachers.split(",") if t]
+    s, z = torch.from_numpy(s).to(device), torch.from_numpy(z).to(device)
     stats = json.load(open(os.path.join(a.weights, "chan_stats.json")))
-    zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in teach}
-    fmap = {t: M.load_map(a.weights, t, a.model, device) for t in teach}
-    tmaps = None
-    if a.layouts:
-        lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
-        tmaps = {t: tokens.align(lay(a.model), lay(t)) for t in teach}
+    zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.teachers}
+    fmap = {t: M.load_map(a.weights, t, a.model, device) for t in a.teachers}
+    lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
+    tmaps = {t: tokens.align(lay(a.model), lay(t)) for t in a.teachers}
     return s, mix.soup(z, zt, fmap, stats, a.model, token_maps=tmaps, device=device)
 
 
 def main(model="protenix"):
-    global H
     H = importlib.import_module(f"soupfold.hooks.{model}")
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["native", "soupfold"], required=True)
-    ap.add_argument("--input", nargs="+", required=True, help="Protenix-format system JSON(s)")
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--repr-root", required=True, help="representation store (written by native, read by soupfold)")
-    ap.add_argument("--seed", type=int, default=1)
-    ap.add_argument("--samples", type=int, default=None, help="default 5 (soupfold), 1 (native)")
-    ap.add_argument("--recycling", type=int, default=10)
-    ap.add_argument("--sampling-steps", type=int, default=None, help="default 200 (soupfold), 2 (native)")
-    ap.add_argument("--teachers", default="", help="soupfold: comma list, e.g. esmfold2,opendde,af3")
-    ap.add_argument("--layouts", default=None, help="token layouts (scripts/token_layout.py); omit only if all "
-                                                    "models tokenise identically")
-    ap.add_argument("--weights", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "weights"))
+    ap = cli.parser(model)
     if model == "opendde":
         ap.add_argument("--checkpoint", required=True, help="OpenDDE checkpoint (opendde.pt)")
     ap.add_argument("--template-mmcif-dir", required=True)
     ap.add_argument("--release-dates", required=True, help="release_date_cache.json (Protenix common data)")
     ap.add_argument("--obsolete-pdbs", required=True, help="obsolete_to_successor.json (Protenix common data)")
-    ap.add_argument("--kalign", required=True, help="path to the kalign binary")
-    a = ap.parse_args()
-    a.model = model
-    # native runs exist to store the trunk representation. Their samples are not used, so by default they get
-    # one sample and 2 diffusion steps (noise). Pass the paper values to get real native structures.
-    a.samples = a.samples or (1 if a.mode == "native" else 5)
-    a.sampling_steps = a.sampling_steps or (2 if a.mode == "native" else 200)
+    ap.add_argument("--kalign", required=True)
+    a = cli.finish(ap.parse_args(), model, steps=200)
     # kalign (template featurisation) reads a non-terminal stdin and blocks forever on a pipe or socket
     os.dup2(os.open(os.devnull, os.O_RDONLY), 0)
-    os.makedirs(a.out, exist_ok=True)
     torch.set_float32_matmul_precision("high")
     runner, seed_everything, to_device, get_loader, update_cfg = build_runner(a)
-    model, base_cfg = runner.model, copy.deepcopy(runner.configs)
+    net, base_cfg = runner.model, copy.deepcopy(runner.configs)
     for jpath in a.input:
-        runner.configs.input_json_path = jpath
+        runner.configs.input_json_path = inputs.resolved(jpath, os.path.join(a.workdir, "logs", "inputs"))
         for batch in get_loader(configs=runner.configs):
             data, atom_array, err = batch[0]
             if err:
@@ -153,22 +123,23 @@ def main(model="protenix"):
             seed_everything(seed=a.seed, deterministic=False)
             if a.mode == "native":
                 box = {}
-                with torch.no_grad(), H.capture_trunk(model, box):
-                    pred = predict(runner, data, to_device, a.model)
-                reprs.save(a.repr_root, a.model, a.seed, sid, box["z"].squeeze(0) if box["z"].dim() == 4 else box["z"],
+                with torch.no_grad(), H.capture_trunk(net, box):
+                    pred = predict(runner, data, to_device, model)
+                reprs.save(a.repr_root, model, a.seed, sid, box["z"].squeeze(0) if box["z"].dim() == 4 else box["z"],
                            box["s"].squeeze(0) if box["s"].dim() == 3 else box["s"], recycling=a.recycling)
             else:
                 s, z = soup_inputs(a, sid, runner.device)
-                if a.model == "opendde":           # OpenDDE consumes the trunk output in bf16
+                if model == "opendde":                # OpenDDE consumes the trunk output in bf16
                     s, z = s.to(torch.bfloat16), z.to(torch.bfloat16)
                 H.drop_template_features(data["input_feature_dict"])
-                with torch.no_grad(), H.trunk_bypass(model, s, z), H.seed_diffusion(model, a.seed):
-                    pred = predict(runner, data, to_device, a.model)
-            name = {"dataset_name" if a.model == "protenix" else "group_name": ""}
+                with torch.no_grad(), H.trunk_bypass(net, s, z), H.seed_diffusion(net, a.seed):
+                    pred = predict(runner, data, to_device, model)
+            name = {"dataset_name" if model == "protenix" else "group_name": ""}
             runner.dumper.dump(**name, pdb_id=sid, seed=a.seed, pred_dict=pred, atom_array=atom_array,
                                entity_poly_type={k: v for k, v in data["entity_poly_type"].items() if v != "non-polymer"})
             conf = flatten(a.out, sid, a.seed)
-            print(f"{sid} [{a.model} {a.mode} seed {a.seed}] ranking_score {np.round(conf, 4).tolist()}", flush=True)
+            print(f"{sid} [{model} {a.mode} seed {a.seed}] ranking_score {np.round(conf, 4).tolist()} -> {a.out}",
+                  flush=True)
             pred = None
             torch.cuda.empty_cache()
 

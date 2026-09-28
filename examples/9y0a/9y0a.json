@@ -1,0 +1,46 @@
+[
+ {
+  "name": "9y0a",
+  "sequences": [
+   {
+    "proteinChain": {
+     "sequence": "MGVFNYETETTSVIPAARLFKAFILDGDNLFPKVAPQAISSVENIEGNGGPGTIKKISFPEGFPFKYVKDRVDEVDHTNFKYNYSVIEGGPIGDTLEKISNEIKIVATPDGGSILKISNKYHTKGDHEVKAEQVKASKEMGETLLRAVESYLLAHSDAYN",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain1_unpaired.a3m",
+     "pairedMsaPath": "msa/chain1_paired.a3m",
+     "templatesPath": "templates/chain1_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "EVQLQESGPGLVKPSETLSLTCTVSGGSISTNGYYWGWIRQPPGKGLDWIGSISYSGNTYYNPSLQSRVSISVDTSKKQFSLKLSSVTASDTAVYYCARHGANWEGVVGWFDPWGQGTLVTVSSASTKGPSVFPLAPSSKSTSGGTAALGCLVKDYFPEPVTVSWNSGALTSGVHTFPAVLQSSGLYSLSSVVTVPSSSLGTQTYICNVNHKPSNTKVDKKVEPKSC",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain2_unpaired.a3m",
+     "pairedMsaPath": "msa/chain2_paired.a3m",
+     "templatesPath": "templates/chain2_hmmsearch.a3m"
+    }
+   },
+   {
+    "proteinChain": {
+     "sequence": "QSVLPQPPSVSAAPGQNVTISCSGSISNIGNNYVSWYQRLPGTAPKLLIYGNNNRPSGIPDRFSGSKSATSATLGITGLQAGDEAVYYCGTWDSSLRAGVFGGGTQLTVLGQPKAAPSVTLFPPSSEELQANKATLVCLISDFYPGAVTVAWKADSSPVKAGVETTTPSKQSNNKYAASSYLSLTPEQWKSHRSYSCQVTHEGSTVEKTVAPTECS",
+     "count": 1,
+     "unpairedMsaPath": "msa/chain3_unpaired.a3m",
+     "pairedMsaPath": "msa/chain3_paired.a3m",
+     "templatesPath": "templates/chain3_hmmsearch.a3m"
+    }
+   },
+   {
+    "ligand": {
+     "ligand": "CCD_NAG",
+     "count": 2
+    }
+   },
+   {
+    "ligand": {
+     "ligand": "CCD_CL",
+     "count": 1
+    }
+   }
+  ]
+ }
+]

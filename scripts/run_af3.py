@@ -1,20 +1,14 @@
-"""AlphaFold3 (teacher only): native folding and trunk-representation extraction.
+"""AlphaFold3 (teacher only): native run that stores the trunk representation.
 
-Builds the AF3 input from the same Protenix-format JSON the other models read, so every
-model sees one MSA / template regime:
-  * unpaired MSA = paired rows prepended to the unpaired a3m, deduplicated (Protenix's
-    msa_pair_as_unpair), and the paired MSA is passed through as well
-  * templates = AF3's own parse of the chain's hmmsearch a3m (`templatesPath`) against a
-    local mmCIF store, filtered at --template-cutoff, at most 4 hits.
-Runs the model with return_embeddings=True and stores z = pair_embeddings,
-s = single_embeddings to <repr-root>/af3/seed_<seed>/<system>.npz, plus the samples.
+Builds the AF3 input from the same Protenix-format JSON: unpaired MSA = paired rows prepended to the
+unpaired a3m (deduplicated), templates = AF3's parse of the hmmsearch a3m against the local mmCIF
+store (cutoff 2021-09-30, at most 4). Stores z = pair_embeddings, s = single_embeddings in
+<workdir>/reprs/af3/seed_<k>/.
 
-  python scripts/run_af3.py --input 8JT6.json --seed 1 --model-dir <af3 params> \
-         --template-mmcif-dir <mmcif store> --repr-root reprs --out out/af3/seed_1
+  python scripts/run_af3.py --input examples/9y0a/9y0a.json --model-dir <af3> --template-mmcif-dir <mmcif>
 
-Run with AlphaFold3 (v3.0.1) on the path, with patches/af3_atom_layout.diff applied.
+Run with AlphaFold3 v3.0.1 on PYTHONPATH (repo root and src/), with the atom_layout patch applied.
 """
-import argparse
 import datetime
 import json
 import os
@@ -24,7 +18,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from soupfold import reprs  # noqa: E402
+from soupfold import cli, inputs, reprs  # noqa: E402
 
 import jax  # noqa: E402
 from absl import flags  # noqa: E402
@@ -133,29 +127,18 @@ def af3_record(rec, seed, store, cutoff):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", nargs="+", required=True, help="Protenix-format system JSON(s)")
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--repr-root", required=True)
+    ap = cli.parser("af3", soupfold=False)
     ap.add_argument("--model-dir", required=True, help="AF3 parameter directory")
     ap.add_argument("--template-mmcif-dir", required=True)
     ap.add_argument("--template-cutoff", default="2021-09-30")
-    ap.add_argument("--seed", type=int, default=1)
-    ap.add_argument("--samples", type=int, default=1, help="paper: 5")
-    ap.add_argument("--sampling-steps", type=int, default=2, help="paper: 200")
-    ap.add_argument("--recycling", type=int, default=10)
-    a = ap.parse_args()
-    os.makedirs(a.out, exist_ok=True)
-    # AF3 is a teacher only, so this run exists to store its trunk representation. Its samples are not used,
-    # so by default it draws one sample with 2 diffusion steps (noise). Pass the paper values for real structures.
+    a = cli.finish(ap.parse_args(), "af3", steps=200)
     config = ra.make_model_config(num_recycles=a.recycling, return_embeddings=True, num_diffusion_samples=a.samples)
     config.heads.diffusion.eval.steps = a.sampling_steps
     runner = ra.ModelRunner(config=config, device=jax.local_devices()[0], model_dir=pathlib.Path(a.model_dir))
     store = structure_stores.StructureStore(a.template_mmcif_dir)
     cutoff = datetime.date.fromisoformat(a.template_cutoff)
     for jpath in a.input:
-        rec = json.load(open(jpath))
-        rec = rec[0] if isinstance(rec, list) else rec
+        rec = inputs.load(jpath)
         sid = rec["name"]
         fi = folding_input.Input.from_json(json.dumps(af3_record(rec, a.seed, store, cutoff)))
         res = ra.predict_structure(fi, runner, ref_max_modified_date=datetime.date(3000, 1, 1))
@@ -167,7 +150,7 @@ def main():
             open(os.path.join(a.out, f"{sid}__s{i}.cif"), "w").write(r.predicted_structure.to_mmcif())
             conf.append(float(r.metadata["ranking_score"]))
         json.dump({"conf": conf, "metric": "ranking_score"}, open(os.path.join(a.out, f"{sid}__conf.json"), "w"))
-        print(f"{sid} [af3 native seed {a.seed}] ranking_score {[round(c, 4) for c in conf]}", flush=True)
+        print(f"{sid} [af3 native seed {a.seed}] ranking_score {[round(c, 4) for c in conf]} -> {a.out}", flush=True)
 
 
 if __name__ == "__main__":

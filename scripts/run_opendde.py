@@ -1,10 +1,6 @@
-"""OpenDDE: native folding (saving the trunk representation) and SoupFold folding.
+"""OpenDDE: same code path and flags as scripts/run_protenix.py, plus --checkpoint.
 
-Same code path and flags as scripts/run_protenix.py (OpenDDE shares Protenix's trunk
-interface), plus --checkpoint for the OpenDDE weights.
-
-  python scripts/run_opendde.py --mode soupfold --checkpoint opendde.pt --input 8JT6.json --seed 1 \
-         --teachers esmfold2,protenix,af3 --layouts layouts/ ...
+  python scripts/run_opendde.py --mode native --input examples/9y0a/9y0a.json --checkpoint <opendde.pt> <data flags>
 """
 import os
 import sys
