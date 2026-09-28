@@ -194,15 +194,15 @@ requires citing the AlphaFold 3 paper.
   doi = {10.64898/2026.02.05.703733},
   publisher = {Cold Spring Harbor Laboratory},
   URL = {https://www.biorxiv.org/content/early/2026/02/22/2026.02.05.703733.1},
+  eprint = {https://www.biorxiv.org/content/early/2026/02/22/2026.02.05.703733.1.full.pdf},
   journal = {bioRxiv}
 }
 
-@software{opendde2026,
-  title  = {OpenDDE},
-  author = {{Aureka AI Research}},
-  year   = {2026},
-  version = {1.1.0},
-  url    = {https://github.com/aurekaresearch/OpenDDE}
+@article{opendde2026,
+  title   = {Folding, Reasoning, and Scaling with Open-source Drug Discovery Engine},
+  author  = {{Aureka AI OpenDDE project}},
+  journal = {arXiv preprint arXiv:2607.03787},
+  year    = {2026}
 }
 
 @misc{candido2026language,
