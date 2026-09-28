@@ -156,8 +156,9 @@ SoupFold fully follows the licenses of its anchor and peer models, listed below.
 
 AlphaFold 3 is used for non-commercial research only, as a peer and never as an anchor. This work does not
 train a model similar to AlphaFold 3. It trains only representation transfer networks, and none of them predicts
-AlphaFold 3 representations. The AlphaFold3 panels of the figures are subject to the
-[AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md).
+AlphaFold 3 representations. We follow the
+[AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md)
+and [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LICENSE).
 
 ## Citation
 
