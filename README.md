@@ -221,7 +221,7 @@ SoupFold fully follows the licenses of its anchor and peer models, listed below.
 | ESMFold2 | [MIT](https://github.com/Biohub/esm) | [MIT](https://huggingface.co/biohub/ESMFold2) (ESMFold2), [MIT](https://huggingface.co/biohub/ESMC-6B) and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
 
 AlphaFold 3 is used for non-commercial research only, as a peer and never as an anchor. This work does not
-train a model similar to AlphaFold 3. It trains only representation transfer networks, none of which maps into
-AlphaFold 3. The AlphaFold3 panels of the figures are subject to the
+train a model similar to AlphaFold 3. It trains only representation transfer networks, and none of them predicts
+AlphaFold 3 representations. The AlphaFold3 panels of the figures are subject to the
 [AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md),
 and `patches/af3_atom_layout.diff` contains AlphaFold 3 code under CC BY-NC-SA 4.0.
