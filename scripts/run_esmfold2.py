@@ -1,12 +1,12 @@
-"""ESMFold2: native run (stores the trunk representation) or SoupFold run.
+"""ESMFold2: standalone run (stores the trunk representation) or SoupFold run.
 
-  native    trunk seeded by --seed (ESMC-embedding dropout 0.3, MSA column masking 0.1 give per-seed
-            diversity), z stored in <workdir>/reprs/esmfold2/seed_<k>/, then diffusion from that z.
-  soupfold  no trunk. Mixes this model's stored z with the peers' stored z (same seed), then runs
-            diffusion from z'.
+  standalone  trunk seeded by --seed (ESMC-embedding dropout 0.3, MSA column masking 0.1 give per-seed
+              diversity), z stored in <workdir>/reprs/esmfold2/seed_<k>/, then diffusion from that z.
+  soupfold    no trunk. Mixes this model's stored z with the peers' stored z (same seed), then runs
+              diffusion from z'.
 
-  python scripts/run_esmfold2.py --mode native   --input examples/9mnb/9mnb.json --ckpt <esmfold2> --esmc <esmc>
-  python scripts/run_esmfold2.py --mode soupfold --input examples/9mnb/9mnb.json --ckpt <esmfold2> --esmc <esmc>
+  python scripts/run_esmfold2.py --mode standalone --input examples/9mnb/9mnb.json --ckpt <esmfold2> --esmc <esmc>
+  python scripts/run_esmfold2.py --mode soupfold   --input examples/9mnb/9mnb.json --ckpt <esmfold2> --esmc <esmc>
 
 Run in an esm 3.4.0 environment (unmodified).
 """
@@ -116,8 +116,8 @@ def main():
     ap = cli.parser("esmfold2")
     ap.add_argument("--ckpt", required=True, help="ESMFold2 checkpoint directory")
     ap.add_argument("--esmc", required=True, help="ESMC-6B checkpoint directory")
-    ap.add_argument("--lm-dropout", type=float, default=0.3, help="native: trunk ESMC-embedding dropout")
-    ap.add_argument("--msa-column-mask-rate", type=float, default=0.1, help="native: trunk MSA column masking")
+    ap.add_argument("--lm-dropout", type=float, default=0.3, help="standalone: trunk ESMC-embedding dropout")
+    ap.add_argument("--msa-column-mask-rate", type=float, default=0.1, help="standalone: trunk MSA column masking")
     a = cli.finish(ap.parse_args(), "esmfold2", steps=68)
     device = "cuda"
     torch.set_float32_matmul_precision("high")
@@ -128,9 +128,9 @@ def main():
         rec = inputs.load(jpath)
         sid = rec["name"]
         with tempfile.TemporaryDirectory() as wd:
-            feats, chains = builder.prepare_input(to_esm_input(rec, wd), seed=0 if a.mode == "native" else a.seed,
+            feats, chains = builder.prepare_input(to_esm_input(rec, wd), seed=0 if a.mode == "standalone" else a.seed,
                                                   device=device)
-        if a.mode == "native":
+        if a.mode == "standalone":
             box = {}
             set_lm_dropout(model, a.lm_dropout)
             model.set_chunk_size(64)

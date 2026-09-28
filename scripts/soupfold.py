@@ -1,12 +1,12 @@
-"""SoupFold pipeline: native runs of all four models, token layouts, then SoupFold for each anchor.
+"""SoupFold pipeline: standalone runs of all four models, token layouts, then SoupFold for each anchor.
 
   python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json
   python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --seeds 1-5 --sample
 
 Each model runs in its own environment (see config.example.json). Outputs under --workdir:
   reprs/<model>/seed_<k>/             trunk representations
-  logs/<model>/seed_<k>/              native runs without --sample (1 sample, 2 steps)
-  samples/standalone/<model>/seed_<k> native runs with --sample (5 samples, default steps)
+  logs/<model>/seed_<k>/              standalone runs without --sample (1 sample, 2 steps)
+  samples/standalone/<model>/seed_<k> standalone runs with --sample (5 samples, default steps)
   layouts/<model>/                    token layouts
   samples/soupfold/<anchor>/seed_<k>/ SoupFold results (5 samples, default steps)
   logs/run/                           stdout of every step
@@ -67,7 +67,7 @@ def main():
     ap.add_argument("--workdir", default="soupfold_out")
     ap.add_argument("--seeds", default="1", help="e.g. 1 or 1-5")
     ap.add_argument("--anchors", default="protenix,opendde,esmfold2")
-    ap.add_argument("--sample", action="store_true", help="native runs also sample real structures")
+    ap.add_argument("--sample", action="store_true", help="standalone runs also sample real structures")
     a = ap.parse_args()
     cfg = load_config(a.config)
     inp = [os.path.abspath(x) for x in a.input]
@@ -80,13 +80,13 @@ def main():
     L = os.path.join(W, "logs", "run")
     ks = seeds(a.seeds)
 
-    for k in ks:                                  # 1. native runs (representations)
+    for k in ks:                                  # 1. standalone runs (representations)
         for m in MODELS:
-            mode = [] if m == "af3" else ["--mode", "native"]
-            run(cfg, m, [SCRIPT[m], *mode, "--seed", str(k), *common, *extra[m]], f"{L}/native_{m}_seed{k}.log")
+            mode = [] if m == "af3" else ["--mode", "standalone"]
+            run(cfg, m, [SCRIPT[m], *mode, "--seed", str(k), *common, *extra[m]], f"{L}/standalone_{m}_seed{k}.log")
 
     for m in MODELS:                              # 2. token layouts
-        run(cfg, "protenix", ["token_layout.py", "--pred", out_dir(W, m, "native", a.sample, ks[0]), "--model", m,
+        run(cfg, "protenix", ["token_layout.py", "--pred", out_dir(W, m, "standalone", a.sample, ks[0]), "--model", m,
                               "--out", os.path.join(W, "layouts")], f"{L}/layout_{m}.log")
 
     for k in ks:                                  # 3. SoupFold

@@ -77,7 +77,7 @@ def trunk_bypass(model, s, z):
 
 @contextlib.contextmanager
 def seed_diffusion(model, seed):
-    """Reseed right before the diffusion sampler, so a bypass run and a native run reach it
+    """Reseed right before the diffusion sampler, so a bypass run and a standalone run reach it
     with the same RNG state (the skipped trunk would otherwise consume random draws)."""
     original = model.sample_diffusion
 

@@ -29,8 +29,8 @@ def resolved(json_path, workdir):
 
 
 def out_dir(workdir, model, mode, sample, seed):
-    """samples/soupfold/<model> for SoupFold, samples/standalone/<model> for sampled native runs,
-    logs/<model> for native runs that only store representations."""
+    """samples/soupfold/<model> for SoupFold, samples/standalone/<model> for sampled standalone runs,
+    logs/<model> for standalone runs that only store representations."""
     if mode == "soupfold":
         sub = os.path.join("samples", "soupfold", model)
     else:

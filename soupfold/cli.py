@@ -10,12 +10,12 @@ WEIGHTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "weight
 def parser(model, soupfold=True):
     ap = argparse.ArgumentParser()
     if soupfold:
-        ap.add_argument("--mode", choices=["native", "soupfold"], default="native")
+        ap.add_argument("--mode", choices=["standalone", "soupfold"], default="standalone")
     ap.add_argument("--input", nargs="+", required=True, help="Protenix-format system JSON(s)")
     ap.add_argument("--workdir", default=".", help="outputs go under samples/, logs/, reprs/, layouts/ here")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--sample", action="store_true",
-                    help="native: sample real structures into samples/standalone/ instead of logs/")
+                    help="standalone: sample real structures into samples/standalone/ instead of logs/")
     ap.add_argument("--samples", type=int, default=None)
     ap.add_argument("--sampling-steps", type=int, default=None)
     ap.add_argument("--recycling", type=int, default=10)
@@ -29,11 +29,11 @@ def parser(model, soupfold=True):
 
 
 def finish(a, model, steps):
-    """Fill defaults. Native runs are for the representations: without --sample they draw one
+    """Fill defaults. Standalone runs are for the representations: without --sample they draw one
     sample with 2 diffusion steps (noise) into logs/. SoupFold and --sample use 5 samples and the
     model's default steps."""
     a.model = model
-    a.mode = getattr(a, "mode", "native")
+    a.mode = getattr(a, "mode", "standalone")
     real = a.mode == "soupfold" or a.sample
     a.samples = a.samples or (5 if real else 1)
     a.sampling_steps = a.sampling_steps or (steps if real else 2)

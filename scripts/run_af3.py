@@ -1,4 +1,4 @@
-"""AlphaFold3 (peer only): native run that stores the trunk representation.
+"""AlphaFold3 (peer only): standalone run that stores the trunk representation.
 
 Builds the AF3 input from the same Protenix-format JSON: unpaired MSA = paired rows prepended to the
 unpaired a3m (deduplicated), templates = AF3's parse of the hmmsearch a3m against the local mmCIF
@@ -150,7 +150,7 @@ def main():
             open(os.path.join(a.out, f"{sid}__s{i}.cif"), "w").write(r.predicted_structure.to_mmcif())
             conf.append(float(r.metadata["ranking_score"]))
         json.dump({"conf": conf, "metric": "ranking_score"}, open(os.path.join(a.out, f"{sid}__conf.json"), "w"))
-        print(f"{sid} [af3 native seed {a.seed}] ranking_score {[round(c, 4) for c in conf]} -> {a.out}", flush=True)
+        print(f"{sid} [af3 standalone seed {a.seed}] ranking_score {[round(c, 4) for c in conf]} -> {a.out}", flush=True)
 
 
 if __name__ == "__main__":

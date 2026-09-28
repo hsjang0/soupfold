@@ -66,15 +66,15 @@ python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json
 
 The pipeline has three steps:
 
-1. **Native runs.** All four models run on the input and store their trunk representations.
+1. **Standalone runs.** All four models run on the input and store their trunk representations.
 2. **Token layouts.** Each model's token order is recorded so the representations can be aligned.
 3. **SoupFold.** Protenix, OpenDDE and ESMFold2 each act as anchor with the other three as peers.
 
-You choose what the native runs produce:
+You choose what the standalone runs produce:
 
-- **Representations only** (default). Native runs draw one sample with 2 diffusion steps, only to
+- **Representations only** (default). Standalone runs draw one sample with 2 diffusion steps, only to
   get the representations. Those structures are not meaningful and go to `logs/`.
-- **Representations and native structures** (`--sample`). Native runs also sample 5 structures
+- **Representations and standalone structures** (`--sample`). Standalone runs also sample 5 structures
   with each model's default steps into `samples/standalone/`, for comparison with SoupFold.
 
 SoupFold itself always draws 5 samples with the anchor's default steps. Use `--seeds 1-5` for
@@ -87,8 +87,8 @@ Everything goes under `--workdir` (default `soupfold_out/`):
 | directory | content |
 |---|---|
 | `samples/soupfold/<anchor>/seed_<k>/` | SoupFold structures (`<system>__s<i>.cif`) and confidences (`<system>__conf.json`) |
-| `samples/standalone/<model>/seed_<k>/` | native structures, with `--sample` |
-| `logs/<model>/seed_<k>/` | native runs without `--sample` |
+| `samples/standalone/<model>/seed_<k>/` | standalone structures, with `--sample` |
+| `logs/<model>/seed_<k>/` | standalone runs without `--sample` |
 | `reprs/`, `layouts/` | representations and token layouts |
 | `logs/run/` | the output of every step |
 
@@ -101,11 +101,11 @@ D="--template-mmcif-dir examples/9mnb/mmcif --release-dates <release_date_cache.
    --obsolete-pdbs <obsolete_to_successor.json> --kalign <kalign>"
 I="--input examples/9mnb/9mnb.json --seed 1"
 
-# 1. native runs (add --sample for native structures)
+# 1. standalone runs (add --sample for standalone structures)
 python scripts/run_af3.py      $I --model-dir <af3> --template-mmcif-dir examples/9mnb/mmcif
-python scripts/run_protenix.py $I --mode native $D
-python scripts/run_opendde.py  $I --mode native $D --checkpoint <opendde.pt>
-python scripts/run_esmfold2.py $I --mode native --ckpt <esmfold2> --esmc <esmc>
+python scripts/run_protenix.py $I --mode standalone $D
+python scripts/run_opendde.py  $I --mode standalone $D --checkpoint <opendde.pt>
+python scripts/run_esmfold2.py $I --mode standalone --ckpt <esmfold2> --esmc <esmc>
 
 # 2. token layouts
 for m in af3 protenix opendde esmfold2; do python scripts/token_layout.py --pred logs/$m/seed_1 --model $m --out layouts; done
@@ -126,8 +126,8 @@ Large complexes can exceed GPU memory.
 
 ## Example outputs
 
-`samples/best_conf/9mnb/` holds, for each native model and for OpenDDE+SoupFold, the top-ranked of
-25 samples (seeds 1-5) with DockQ per interface in `summary.json`. Each native model docks only one
+`samples/best_conf/9mnb/` holds, for each standalone model and for OpenDDE+SoupFold, the top-ranked of
+25 samples (seeds 1-5) with DockQ per interface in `summary.json`. Each standalone model docks only one
 of the two Fabs. SoupFold docks both.
 `samples/standalone/` and `samples/soupfold/` hold our outputs for 9y0a (seeds 1-5).
 

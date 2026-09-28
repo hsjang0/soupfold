@@ -1,12 +1,12 @@
-"""Protenix: native run (stores the trunk representation) or SoupFold run.
+"""Protenix: standalone run (stores the trunk representation) or SoupFold run.
 OpenDDE runs through this same code via scripts/run_opendde.py.
 
-  native    MSA + templates -> trunk -> diffusion. Stores (s, z) in <workdir>/reprs/<model>/seed_<k>/.
-  soupfold  no trunk. Mixes this model's stored z with the peers' stored z (same seed), then runs
-            diffusion and confidence from (s, z').
+  standalone  MSA + templates -> trunk -> diffusion. Stores (s, z) in <workdir>/reprs/<model>/seed_<k>/.
+  soupfold    no trunk. Mixes this model's stored z with the peers' stored z (same seed), then runs
+              diffusion and confidence from (s, z').
 
-  python scripts/run_protenix.py --mode native   --input examples/9mnb/9mnb.json <data flags>
-  python scripts/run_protenix.py --mode soupfold --input examples/9mnb/9mnb.json <data flags>
+  python scripts/run_protenix.py --mode standalone --input examples/9mnb/9mnb.json <data flags>
+  python scripts/run_protenix.py --mode soupfold   --input examples/9mnb/9mnb.json <data flags>
 
 Run in the Protenix 2.0.0 (or OpenDDE 1.1.0) environment with the parser patch applied.
 """
@@ -124,7 +124,7 @@ def main(model="protenix"):
             sid = data["sample_name"]
             runner.update_model_configs(update_cfg(base_cfg, data["N_token"].item()))
             seed_everything(seed=a.seed, deterministic=False)
-            if a.mode == "native":
+            if a.mode == "standalone":
                 box = {}
                 with torch.no_grad(), H.capture_trunk(net, box):
                     pred = predict(runner, data, to_device, model)
