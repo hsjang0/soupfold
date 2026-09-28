@@ -173,9 +173,7 @@ and [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LI
 ```
 
 Please also cite the co-folding models SoupFold builds on. Using or distributing AlphaFold 3 output
-requires citing the AlphaFold 3 paper. The entries below are those given in each model's README. OpenDDE's
-README gives no BibTeX and asks to cite the [software](https://github.com/aurekaresearch/OpenDDE) and its
-[technical report](https://arxiv.org/abs/2607.03787).
+requires citing the AlphaFold 3 paper.
 
 ```bibtex
 @article{Abramson2024,
@@ -199,6 +197,16 @@ README gives no BibTeX and asks to cite the [software](https://github.com/aureka
   URL = {https://www.biorxiv.org/content/early/2026/02/22/2026.02.05.703733.1},
   eprint = {https://www.biorxiv.org/content/early/2026/02/22/2026.02.05.703733.1.full.pdf},
   journal = {bioRxiv}
+}
+
+@misc{project2026foldingreasoningscalingopensource,
+      title={Folding, Reasoning, and Scaling with Open-source Drug Discovery Engine}, 
+      author={Aureka AI OpenDDE project},
+      year={2026},
+      eprint={2607.03787},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2607.03787}, 
 }
 
 @misc{candido2026language,
