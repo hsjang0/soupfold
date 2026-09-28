@@ -41,8 +41,8 @@ The maps and channel statistics are in `weights/`.
 Each model runs in its own Python environment. SoupFold does not ship or modify their code.
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
-> **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). The patches in
-> `patches/` remove the two known differences, so every token is mixed. They have little effect on results.
+> **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). We remove the two
+> known differences with the patches in `patches/`, so every token is mixed. They do not affect the results.
 > Patches: `patches/protenix_parser.diff` (Protenix), `patches/opendde_parser.diff` (OpenDDE), `patches/af3_atom_layout.diff` (AlphaFold3).
 
 ## Input
