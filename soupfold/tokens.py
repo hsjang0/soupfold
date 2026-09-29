@@ -3,10 +3,11 @@
 A model's token layout is read from any structure it predicted, in file order: one token
 per polymer residue, one token per non-polymer (ligand) atom. A residue is identified by
 (chain rank, residue offset within the chain), which is independent of how a model names its
-chains or numbers its residues. Within a ligand residue, atoms are paired by position when both
-models list the same elements in the same order, and by atom name otherwise. Models name the
-atoms of a SMILES ligand differently (ESMFold2 does not use AF3's N1, C1, C2, ...) but keep the
-SMILES atom order, and a CCD ligand whose atom set differs between models still pairs by name.
+chains or numbers its residues. Within a ligand residue, atoms are paired by atom name when both
+models use the same names. Only when the names differ but the elements come in the same order are
+they paired by position: models name the atoms of a SMILES ligand differently (ESMFold2 does not
+use AF3's N1, C1, C2, ...) but all keep the RDKit MolFromSmiles atom order. Otherwise only atoms
+with the same name are paired.
 
 Token identity does not depend on MSA, templates or seed, so one prediction per model and
 system is enough.
@@ -69,7 +70,9 @@ def align(anchor_rows, peer_rows):
         ip = rp.get(res)
         if not ip:
             continue
-        if [anchor_rows[i][2] for i in ia] == [peer_rows[j][2] for j in ip]:
+        same_names = {anchor_rows[i][3] for i in ia} == {peer_rows[j][3] for j in ip}
+        same_elements = [anchor_rows[i][2] for i in ia] == [peer_rows[j][2] for j in ip]
+        if not same_names and same_elements:
             pairs += zip(ia, ip)
         else:
             by_name = {peer_rows[j][3]: j for j in ip}
