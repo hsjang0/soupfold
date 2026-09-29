@@ -150,6 +150,8 @@ Large complexes can exceed GPU memory.
 
 The license of SoupFold fully follows the licenses of its anchor and peer models, listed below. Artifacts
 unique to SoupFold (code, transfer networks and example outputs) are also subject to these licenses.
+SoupFold with AlphaFold3 as a peer cannot run without the AlphaFold 3 model parameters, so its use is fully
+bound by the AlphaFold 3 terms.
 
 | model | code | parameters |
 |---|---|---|
