@@ -11,8 +11,8 @@ Two layouts are aligned at the granularity the models agree on:
             leaves out (absent_chains) has no counterpart.
   residues  one to one within a matched chain.
   atoms     a residue both models hold per atom (a ligand, a modified residue) pairs atom by atom
-            (pair_residue). A residue only one model holds per atom pairs its single token with
-            the centre atom of the other.
+            (pair_residue). A residue only one model holds per atom is not paired: a token for
+            the whole residue and a token for one of its atoms do not denote the same thing.
 
 A token without a counterpart is left out. There the anchor keeps its own representation (mix.py).
 """
@@ -25,7 +25,6 @@ ELEMENTS = ("X H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn 
             "As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm "
             "Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn").split()
 HYDROGEN = ("H", "D")
-CENTRE = ("CA", "C1'", "P", "C1*")
 
 
 def atom_name(chars):
@@ -93,7 +92,10 @@ def pair_residue(ga, gp, smiles, where=""):
     named differently by each model (ESMFold2 does not use AF3's N1, C1, C2, ...), but every model
     keeps the RDKit MolFromSmiles atom order, so it pairs by position when the elements agree, with
     or without the hydrogens a model keeps (ESMFold2 keeps isotopic ones). A SMILES ligand whose
-    heavy atoms still differ between the models cannot be aligned and raises an error."""
+    heavy atoms still differ between the models cannot be aligned and raises an error.
+
+    A residue that is one token in one model and one token per atom in the other (an amino acid
+    given as a ligand, without the parser patch of Protenix / OpenDDE) gets no pair."""
     if len(ga) == 1 and len(gp) == 1:
         return [(ga[0][2], gp[0][2])]
     if len(ga) > 1 and len(gp) > 1:
@@ -110,10 +112,7 @@ def pair_residue(ga, gp, smiles, where=""):
         if len(by_name) < len(gp) or len({x[0] for x in ga}) < len(ga):
             raise ValueError(f"residue{where}: atom names repeat, so its tokens cannot be paired by name")
         return [(i, by_name[name]) for name, _, i in ga if name in by_name]
-    one, many = (ga, gp) if len(ga) == 1 else (gp, ga)               # one model holds it per atom
-    names = [x[0] for x in many]
-    centre = many[next((names.index(c) for c in CENTRE if c in names), 0)][2]
-    return [(one[0][2], centre)] if len(ga) == 1 else [(centre, one[0][2])]
+    return []                                                        # only one model holds it per atom
 
 
 def smiles_chains(record):
