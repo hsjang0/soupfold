@@ -163,21 +163,8 @@ the framework of each environment with its ROCm build. The model packages, the w
 | OpenDDE | torch 2.7.1+rocm7.2, triton 3.3.1+rocm | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512`; on MI350X also `TORCH_BLAS_PREFER_HIPBLASLT=0` and `DISABLE_ADDMM_HIP_LT=1` |
 | ESMFold2 | torch 2.10.0+rocm7.2, triton 3.6.0+rocm | `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
 
-- **AlphaFold3.** We keep the default Triton flash attention. tokamax reads the device capability as a
-  number, and ROCm reports `gfx942`, so it needs `patches/tokamax_rocm.diff`
-  (apply in `site-packages` with `patch -p1`). The patch also fits the attention tiles into the 64 KiB of
-  shared memory of a workgroup. `TOKAMAX_ROCM_ATTENTION_TRITON=1` turns the kernel on for attention only.
-- **Protenix and OpenDDE.** `LAYERNORM_TYPE=torch` selects the PyTorch LayerNorm, since the fused kernel is
-  built for CUDA. ROCm does not implement `expandable_segments`, and `max_split_size_mb:512` is what keeps
-  large complexes from failing on fragmented memory. On MI350X, systems above about 2,000 tokens can fail
-  inside hipBLASLt. The two OpenDDE variables route its matrix products away from hipBLASLt, and we run
-  these systems on MI300X.
-- **ESMFold2.** TransformerEngine, flash-attn and cuEquivariance are CUDA-only, so ESMFold2 uses its
-  PyTorch implementations. The numerics differ slightly. ROCm reports a diffusion batch that does not fit
-  as `HIP error: invalid configuration argument`, and the batch is halved in the same way as on out of memory.
-
-With these settings, AlphaFold3 on MI300X matches our NVIDIA runs on the 66 largest FoldBench
-protein-protein systems (mean DockQ 0.695 and 0.697 over 82 interfaces).
+- **AlphaFold3.** Apply `patches/tokamax_rocm.diff` inside `site-packages` with `patch -p1`.
+- **MI350X.** Protenix and OpenDDE can fail on systems above about 2,000 tokens. We run these on MI300X.
 
 ## License
 
