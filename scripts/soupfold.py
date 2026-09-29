@@ -1,7 +1,8 @@
-"""SoupFold pipeline: standalone runs of all four models, token layouts, then SoupFold for each anchor.
+"""SoupFold pipeline: standalone runs of the anchor and its peers, token layouts, then SoupFold.
 
-  python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json
-  python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --seeds 1-5 --sample
+  python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --anchor opendde
+  python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --anchor opendde \
+      --peers protenix,esmfold2 --seeds 1-5 --sample
 
 Each model runs in its own environment (see config.example.json). Outputs under --workdir:
   reprs/<model>/seed_<k>/             trunk representations
@@ -66,22 +67,19 @@ def main():
     ap.add_argument("--input", nargs="+", required=True, help="Protenix-format system JSON(s)")
     ap.add_argument("--workdir", default="soupfold_out")
     ap.add_argument("--seeds", default="1", help="e.g. 1 or 1-5")
-    ap.add_argument("--anchors", default="protenix,opendde,esmfold2")
+    ap.add_argument("--anchor", required=True, choices=["protenix", "opendde", "esmfold2"])
     ap.add_argument("--peers", default=None,
-                    help="e.g. protenix,opendde. Default: for each anchor, the other three models. Only the anchors and "
-                         "these peers are run, so SoupFold without AlphaFold3 needs no AlphaFold3 setup")
+                    help="e.g. protenix,esmfold2. Default: the other three models. Only the anchor and these peers "
+                         "are run, so SoupFold without AlphaFold3 needs no AlphaFold3 setup")
     ap.add_argument("--sample", action="store_true", help="standalone runs also sample real structures")
     a = ap.parse_args()
-    anchors = a.anchors.split(",")
-    peers = a.peers.split(",") if a.peers else None
-    for m in anchors + (peers or []):
-        if m not in MODELS:
-            sys.exit(f"[soupfold] unknown model {m!r}, choose from {', '.join(MODELS)}")
-    if "af3" in anchors:
-        sys.exit("[soupfold] AlphaFold3 is a peer only, it cannot be an anchor")
-    if peers and any(not [p for p in peers if p != b] for b in anchors):
-        sys.exit("[soupfold] every anchor needs at least one peer other than itself")
-    models = [m for m in MODELS if peers is None or m in anchors + peers]
+    peers = [p for p in (a.peers.split(",") if a.peers else MODELS) if p != a.anchor]
+    for p in peers:
+        if p not in MODELS:
+            sys.exit(f"[soupfold] unknown model {p!r}, choose from {', '.join(MODELS)}")
+    if not peers:
+        sys.exit("[soupfold] the anchor needs at least one peer")
+    models = [m for m in MODELS if m == a.anchor or m in peers]
     cfg = load_config(a.config)
     inp = [os.path.abspath(x) for x in a.input]
     W = os.path.abspath(a.workdir)
@@ -102,11 +100,10 @@ def main():
         run(cfg, "protenix", ["token_layout.py", "--pred", out_dir(W, m, "standalone", a.sample, ks[0]), "--model", m,
                               "--out", os.path.join(W, "layouts")], f"{L}/layout_{m}.log")
 
+    b = a.anchor
     for k in ks:                                  # 3. SoupFold
-        for b in anchors:
-            chosen = ["--peers", ",".join(p for p in peers if p != b)] if peers else []
-            run(cfg, b, [SCRIPT[b], "--mode", "soupfold", "--seed", str(k), "--input", *inp, "--workdir", W,
-                         *chosen, *extra[b]], f"{L}/soupfold_{b}_seed{k}.log")
+        run(cfg, b, [SCRIPT[b], "--mode", "soupfold", "--seed", str(k), "--input", *inp, "--workdir", W,
+                     "--peers", ",".join(peers), *extra[b]], f"{L}/soupfold_{b}_seed{k}.log")
     print(f"[soupfold] done. SoupFold samples in {W}/samples/soupfold/", flush=True)
 
 

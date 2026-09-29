@@ -81,17 +81,18 @@ weights and data files. Then run:
 
 ```bash
 python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json \
-    --anchors opendde --peers af3,protenix,esmfold2
+    --anchor opendde --peers af3,protenix,esmfold2
 ```
 
-`--anchors` sets the anchor and `--peers` the peers, and only these models are run. To run without
-AlphaFold3, drop `af3` from `--peers` (see [Peer selection](#license)).
+`--anchor` sets the anchor (Protenix, OpenDDE or ESMFold2) and `--peers` the peers, and only these models
+are run. To run without AlphaFold3, drop `af3` from `--peers` (see [Peer selection](#license)).
+Run once per anchor for several anchors.
 
 The pipeline has three steps:
 
-1. **Standalone runs.** The anchors and peers run on the input and store their trunk representations.
+1. **Standalone runs.** The anchor and its peers run on the input and store their trunk representations.
 2. **Token layouts.** Each model's token order is recorded so the representations can be aligned.
-3. **SoupFold.** Each anchor folds the input with its peers.
+3. **SoupFold.** The anchor folds the input with its peers.
 
 You choose what the standalone runs produce:
 
