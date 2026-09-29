@@ -16,6 +16,10 @@
 
 > Co-folding models such as AlphaFold3, Protenix, ESMFold2, and OpenDDE have advanced rapidly, yet no single model consistently performs best across all biomolecular complexes. In this paper, we show that their pair representations encode complementary information that can be transferred across models to improve structure prediction. We introduce SoupFold, which combines pair representations from multiple co-folding models in a common representation space and generates structures from the combined representation. Importantly, SoupFold does not retrain the co-folding models and learns only simple mappings to transfer representations across models. We evaluate SoupFold on antibody-antigen, protein-protein, protein-ligand, molecular glue, GPCR, and oligomeric complex prediction using AlphaFold3, Protenix, ESMFold2, and OpenDDE. By combining representations across models, SoupFold improves over individual co-folding models across the considered benchmarks.
 
+> **Acknowledgement.** This work was greatly supported by the
+> [AMD University Program](https://www.amd.com/en/corporate/university-program.html) (AUP), which provided the
+> AMD Instinct GPUs used for our experiments. See [AMD GPU](#amd-gpu) for the settings of each model.
+
 ## How it works
 
 SoupFold improves a co-folding model by combining its pair representation with those of other models.
@@ -145,6 +149,34 @@ Large complexes can exceed GPU memory.
   The result is the same up to floating point order.
 - **ESMFold2.** If 5 samples do not fit in one batch, the batch is halved automatically and the
   samples are drawn over several passes.
+
+## AMD GPU
+
+All four models run on AMD Instinct GPUs (MI300X `gfx942`, MI350X `gfx950`) with ROCm 7.2. We replace only
+the framework of each environment with its ROCm build. The model packages, the weights and the patches in
+`patches/` stay as they are. The settings below go into the `env` field of each model in `config.json`.
+
+| model | framework on ROCm | settings |
+|---|---|---|
+| AlphaFold3 | jax / jaxlib 0.10.2, `jax-rocm7-plugin` and `jax-rocm7-pjrt` 0.10.2, tokamax 0.0.8 with `patches/tokamax_rocm.diff` | `TOKAMAX_ROCM_ATTENTION_TRITON=1`, `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_PYTHON_CLIENT_ALLOCATOR=platform` |
+| Protenix | torch 2.7.1+rocm7.2 | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
+| OpenDDE | torch 2.7.1+rocm7.2, triton 3.3.1+rocm | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512`; on MI350X also `TORCH_BLAS_PREFER_HIPBLASLT=0` and `DISABLE_ADDMM_HIP_LT=1` |
+| ESMFold2 | torch 2.10.0+rocm7.2, triton 3.6.0+rocm | `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
+
+- **AlphaFold3.** We keep the default Triton flash attention. tokamax reads the device capability as a
+  number, and ROCm reports `gfx942`, so it needs `patches/tokamax_rocm.diff`
+  (apply in `site-packages` with `patch -p1`). The patch also fits the attention tiles into the 64 KiB of
+  shared memory of a workgroup. `TOKAMAX_ROCM_ATTENTION_TRITON=1` turns the kernel on for attention only.
+- **Protenix and OpenDDE.** `LAYERNORM_TYPE=torch` selects the PyTorch LayerNorm, since the fused kernel is
+  built for CUDA. ROCm does not implement `expandable_segments`, and `max_split_size_mb:512` is what keeps
+  large complexes from failing on fragmented memory. On MI350X, systems above about 2,000 tokens can fail
+  inside hipBLASLt. The two OpenDDE variables route its matrix products away from hipBLASLt, and we run
+  these systems on MI300X.
+- **ESMFold2.** TransformerEngine, flash-attn and cuEquivariance are CUDA-only, so ESMFold2 uses its
+  PyTorch implementations. The numerics differ slightly.
+
+With these settings, AlphaFold3 on MI300X matches our NVIDIA runs on the 66 largest FoldBench
+protein-protein systems (mean DockQ 0.695 and 0.697 over 82 interfaces).
 
 ## License
 

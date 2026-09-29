@@ -1,0 +1,183 @@
+diff -ruN a/tokamax/_src/mosaic_gpu.py b/tokamax/_src/mosaic_gpu.py
+--- a/tokamax/_src/mosaic_gpu.py
++++ b/tokamax/_src/mosaic_gpu.py
+@@ -28,5 +28,9 @@
+   if device.platform != 'gpu':
+     return False
+ 
+-  # Only currently supported for Hopper and above.
+-  return float(device.compute_capability) >= 9.0
++  # Only currently supported for Hopper and above; Mosaic GPU is CUDA-only, so a
++  # ROCm device (compute_capability 'gfx942') is simply unsupported.
++  try:
++    return float(device.compute_capability) >= 9.0
++  except (TypeError, ValueError):
++    return False
+diff -ruN a/tokamax/_src/ops/attention/pallas_triton_flash_attention.py b/tokamax/_src/ops/attention/pallas_triton_flash_attention.py
+--- a/tokamax/_src/ops/attention/pallas_triton_flash_attention.py
++++ b/tokamax/_src/ops/attention/pallas_triton_flash_attention.py
+@@ -16,9 +16,11 @@
+ 
+ import dataclasses
+ import functools
++import os
+ from typing import ClassVar
+ 
+ import jax
++import jax.extend
+ from jax.experimental import pallas as pl
+ from jax.experimental.pallas import triton as plgpu
+ import jax.numpy as jnp
+@@ -507,6 +509,34 @@
+   )
+ 
+ 
++# CDNA gives a workgroup 64 KiB of LDS; stay under it so the kernel's own scratch fits.
++_ROCM_LDS_BUDGET = 48 * 1024
++
++
++def _is_rocm_device(device=None) -> bool:
++  if device is None:
++    device = jax.extend.backend.get_default_device()
++  cc = getattr(device, "compute_capability", None)
++  return isinstance(cc, str) and cc.startswith("gfx")
++
++
++# tokamax's global gate answers False on ROCm (it parses compute_capability as a float),
++# and it must stay that way: normalization and gated_linear_unit consult the same gate and
++# their Triton kernels do not fit in 64 KiB of LDS, so flipping it globally breaks AF3
++# everywhere. Attention is opted in on its own, and only when asked for explicitly.
++_ROCM_TRITON_TARGETS = frozenset(('gfx90a', 'gfx940', 'gfx941', 'gfx942', 'gfx950'))
++
++
++def _attention_triton_supported(device=None) -> bool:
++  if triton_lib.has_triton_support(device):
++    return True
++  if os.environ.get('TOKAMAX_ROCM_ATTENTION_TRITON', '') not in ('1', 'true', 'True'):
++    return False
++  if device is None:
++    device = jax.extend.backend.get_default_device()
++  return getattr(device, 'compute_capability', None) in _ROCM_TRITON_TARGETS
++
++
+ def _can_have_block_d(*args):
+   for arg in args:
+     if isinstance(arg, QArray) and any(
+@@ -566,7 +596,7 @@
+       return_residuals: bool,
+       config: Config,
+   ) -> tuple[Float[Array, "*B T H d"], Residuals | None]:
+-    if not triton_lib.has_triton_support():
++    if not _attention_triton_supported():
+       raise NotImplementedError("Triton not supported on this platform.")
+     if paging_info is not None:
+       raise NotImplementedError("Paged attention not supported.")
+@@ -647,6 +677,22 @@
+     if head_dim_bytes >= 512:
+       num_stages = 1
+ 
++    # These tile sizes are tuned for NVIDIA, where a streaming multiprocessor has
++    # 164-228 KiB of shared memory. A CDNA workgroup has 64 KiB of LDS, and the
++    # default 64x64 tile asks for head_dim_bytes * (block_q + 2 * num_stages * block_k)
++    # = 4 * 128 * (64 + 128) = 96 KiB, so the kernel fails to launch with
++    # "RESOURCE_EXHAUSTED: Shared memory size limit exceeded: requested 98304,
++    # available: 65536". Shrink the pipeline first and then the tiles until the
++    # estimate fits, leaving headroom for the kernel's own scratch.
++    if _is_rocm_device():
++      num_stages = 1
++      lds = lambda: head_dim_bytes * (block_q + 2 * num_stages * block_k)
++      while lds() > _ROCM_LDS_BUDGET and (block_k > min_block or block_q > min_block):
++        if block_k > min_block and block_k >= block_q:
++          block_k //= 2
++        else:
++          block_q //= 2
++
+     if _can_have_block_d(q, k, v):
+       block_d = pl.next_power_of_2(min(head_dim, 64**3 // (block_q * block_k)))
+     else:
+@@ -682,4 +728,4 @@
+ 
+   @override
+   def supported_on(self, device: jax.Device) -> bool:
+-    return triton_lib.has_triton_support(device)
++    return _attention_triton_supported(device)
+diff -ruN a/tokamax/_src/pallas/block.py b/tokamax/_src/pallas/block.py
+--- a/tokamax/_src/pallas/block.py
++++ b/tokamax/_src/pallas/block.py
+@@ -17,6 +17,7 @@
+ from collections.abc import Callable, Sequence
+ import dataclasses
+ import functools
++import inspect
+ import itertools
+ import threading
+ from typing import Any, TypeAlias
+@@ -257,6 +258,11 @@
+   return BlockRef(ref, value.shape, spec)
+ 
+ 
++_PALLAS_CALL_TAKES_BACKEND = (
++    'backend' in inspect.signature(pl.pallas_call).parameters
++)
++
++
+ def _as_tuple(x):
+   return tuple(x) if isinstance(x, Sequence) else (x,)
+ 
+@@ -338,12 +344,18 @@
+         out_specs=out_specs,
+         scratch_shapes=grid_spec.scratch_shapes,
+     )
++    # jax dropped pallas_call's `backend=` kwarg after 0.8; from 0.10 the backend is
++    # chosen from `compiler_params` instead, and tokamax already passes
++    # jax.experimental.pallas.triton.CompilerParams, so dropping it routes to Triton
++    # on both CUDA and ROCm. Keep passing it where the installed jax still takes it.
++    kw = dict(kwargs)
++    if _PALLAS_CALL_TAKES_BACKEND:
++      kw["backend"] = backend
+     return pl.pallas_call(
+         wrapped_kernel,
+         out_shape,
+         grid_spec=grid_spec,
+-        backend=backend,
+-        **kwargs,
++        **kw,
+     )(*args)
+ 
+   return helper
+diff -ruN a/tokamax/_src/precision.py b/tokamax/_src/precision.py
+--- a/tokamax/_src/precision.py
++++ b/tokamax/_src/precision.py
+@@ -128,8 +128,14 @@
+           "Unknown GPU compute capability when determining dot precision"
+           " preset; assuming compute_capability >= 8.0"
+       )
+-    elif float(compute_capability) < 8.0:
+-      backend = "gpu_old"
++    else:
++      try:
++        if float(compute_capability) < 8.0:
++          backend = "gpu_old"
++      except (TypeError, ValueError):
++        # ROCm ('gfx942'/'gfx950'): full bf16 and fp32 dot support, i.e. what the
++        # >= 8.0 branch already assumes. Do not demote to gpu_old.
++        pass
+ 
+   match dtype:
+     case jnp.float16:
+diff -ruN a/tokamax/_src/triton.py b/tokamax/_src/triton.py
+--- a/tokamax/_src/triton.py
++++ b/tokamax/_src/triton.py
+@@ -35,5 +35,10 @@
+   if not hasattr(device, 'compute_capability'):
+     return True
+ 
+-  # Only currently supported for Ampere and above.
+-  return float(device.compute_capability) >= 8.0
++  # Only currently supported for Ampere and above. ROCm reports a gfx target string
++  # instead of a number and has no working Triton path here, so it is 'unsupported',
++  # not a crash.
++  try:
++    return float(device.compute_capability) >= 8.0
++  except (TypeError, ValueError):
++    return False
