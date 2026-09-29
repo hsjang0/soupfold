@@ -3,12 +3,13 @@
 Builds the AF3 input from the same Protenix-format JSON: unpaired MSA = paired rows prepended to the
 unpaired a3m (deduplicated), templates = AF3's parse of the hmmsearch a3m against the local mmCIF
 store (cutoff 2021-09-30, at most 4). Stores z = pair_embeddings, s = single_embeddings in
-<workdir>/reprs/af3/seed_<k>/.
+<workdir>/reprs/af3/seed_<k>/ and the token layout in <workdir>/layouts/af3/.
 
   python scripts/run_af3.py --input examples/9mnb/9mnb.json --model-dir <af3> --template-mmcif-dir <mmcif>
 
 Run with AlphaFold3 v3.0.1 on PYTHONPATH (repo root and src/), with the atom_layout patch applied.
 """
+import contextlib
 import datetime
 import json
 import os
@@ -18,7 +19,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from soupfold import cli, inputs, reprs  # noqa: E402
+from soupfold import cli, inputs, reprs, tokens  # noqa: E402
 
 import jax  # noqa: E402
 from absl import flags  # noqa: E402
@@ -114,7 +115,9 @@ def af3_record(rec, seed, store, cutoff):
                                      "unpairedMsa": pair_as_unpair(paired, unpaired), "pairedMsa": paired,
                                      "templates": templates}})
         elif kind in ("dnaSequence", "rnaSequence"):
-            body = {"id": cid, "sequence": v["sequence"]}
+            body = {"id": cid, "sequence": v["sequence"],
+                    "modifications": [{"modificationType": m["modificationType"].removeprefix("CCD_"),
+                                       "basePosition": m["basePosition"]} for m in v.get("modifications") or []]}
             if kind == "rnaSequence":
                 body["unpairedMsa"] = ""
             seqs.append({"dna" if kind == "dnaSequence" else "rna": body})
@@ -125,6 +128,33 @@ def af3_record(rec, seed, store, cutoff):
         else:
             raise ValueError(f"unhandled entity {kind!r}")
     return {"name": rec["name"], "modelSeeds": [seed], "dialect": "alphafold3", "version": 1, "sequences": seqs}
+
+
+@contextlib.contextmanager
+def capture_features(box):
+    """Record the featurised input AF3 builds inside predict_structure."""
+    original = ra.featurisation.featurise_input
+
+    def wrapped(*args, **kwargs):
+        out = original(*args, **kwargs)
+        box["batch"] = out[0]
+        return out
+
+    ra.featurisation.featurise_input = wrapped
+    try:
+        yield
+    finally:
+        ra.featurisation.featurise_input = original
+
+
+def token_layout(batch, n):
+    """Token layout (soupfold/tokens.py) of the first n tokens (the rest is padding). A token is
+    identified by its centre atom, a slot of the token's own atom list."""
+    i, centre = np.arange(n), np.asarray(batch["residue_center_index"])[:n]
+    names = np.asarray(batch["ref_atom_name_chars"])
+    return tokens.rows(np.asarray(batch["asym_id"])[:n], np.asarray(batch["residue_index"])[:n],
+                       np.asarray(batch["ref_element"])[i, centre],
+                       [tokens.atom_name(names[k, c]) for k, c in zip(i, centre)])
 
 
 def main():
@@ -148,10 +178,14 @@ def main():
         rec = inputs.load(jpath)
         sid = rec["name"]
         fi = folding_input.Input.from_json(json.dumps(af3_record(rec, a.seed, store, cutoff)))
-        res = ra.predict_structure(fi, runner, ref_max_modified_date=datetime.date(3000, 1, 1))
+        box = {}
+        with capture_features(box):
+            res = ra.predict_structure(fi, runner, ref_max_modified_date=datetime.date(3000, 1, 1))
         emb = res[0].embeddings
         reprs.save(a.repr_root, "af3", a.seed, sid, np.asarray(emb["pair_embeddings"], np.float32),
                    np.asarray(emb["single_embeddings"], np.float32), recycling=a.recycling)
+        n = emb["pair_embeddings"].shape[0]
+        tokens.save(a.layouts, "af3", sid, token_layout(box["batch"], n), n)
         conf = []
         for i, r in enumerate(res[0].inference_results):
             open(os.path.join(a.out, f"{sid}__s{i}.cif"), "w").write(r.predicted_structure.to_mmcif())

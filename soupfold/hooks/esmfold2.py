@@ -10,6 +10,8 @@ import contextlib
 import torch
 from torch import nn
 
+from .. import tokens
+
 
 class _Identity(nn.Module):
     def forward(self, z, *args, **kwargs):  # noqa: D102
@@ -68,3 +70,14 @@ def seed_diffusion(model, seed):
         yield
     finally:
         head.sample = original
+
+
+def token_layout(feats, chains):
+    """Token layout (tokens.py) from the featurised input: a token is identified by its first atom."""
+    start = {int(t.token_index): int(t.atom_start) for c in chains for t in vars(c)["tokens"]}
+    atom = [start[i] for i in range(feats["residue_index"].shape[1])]
+    element = feats["ref_element"][0].cpu().numpy()
+    element = element.argmax(-1) if element.ndim == 2 else element
+    names = feats["ref_atom_name_chars"][0].cpu().numpy()
+    return tokens.rows(feats["asym_id"][0].tolist(), feats["residue_index"][0].tolist(),
+                       element[atom], [tokens.atom_name(names[a]) for a in atom])

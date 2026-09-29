@@ -130,6 +130,7 @@ def main(model="protenix"):
                     pred = predict(runner, data, to_device, model)
                 reprs.save(a.repr_root, model, a.seed, sid, box["z"].squeeze(0) if box["z"].dim() == 4 else box["z"],
                            box["s"].squeeze(0) if box["s"].dim() == 3 else box["s"], recycling=a.recycling)
+                tokens.save(a.layouts, model, sid, H.token_layout(atom_array), box["z"].shape[-2])
             else:
                 s, z = soup_inputs(a, sid, runner.device, tokens.smiles_chains(inputs.load(jpath)))
                 if "af3" in a.peers:

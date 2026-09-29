@@ -87,11 +87,12 @@ python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json 
 `--anchor` sets the anchor (Protenix, OpenDDE or ESMFold2) and `--peers` the peers, and only these models
 are run.
 
-The pipeline has three steps:
+The pipeline has two steps:
 
-1. **Standalone runs.** The anchor and its peers run on the input and store their trunk representations.
-2. **Token layouts.** Each model's token order is recorded so the representations can be aligned.
-3. **SoupFold.** The anchor folds the input with its peers.
+1. **Standalone runs.** The anchor and its peers run on the input and store their trunk representations,
+   each with its token layout (the tokens the model made of the input, in order), so the representations
+   can be aligned.
+2. **SoupFold.** The anchor folds the input with its peers.
 
 You choose what the standalone runs produce:
 
@@ -133,10 +134,7 @@ python scripts/run_protenix.py $I --mode standalone $D
 python scripts/run_opendde.py  $I --mode standalone $D --checkpoint <opendde.pt>
 python scripts/run_esmfold2.py $I --mode standalone --ckpt <esmfold2> --esmc <esmc>
 
-# 2. token layouts
-for m in af3 protenix opendde esmfold2; do python scripts/token_layout.py --pred logs/$m/seed_1 --model $m --out layouts; done
-
-# 3. SoupFold with Protenix as anchor
+# 2. SoupFold with Protenix as anchor
 python scripts/run_protenix.py $I --mode soupfold $D
 ```
 

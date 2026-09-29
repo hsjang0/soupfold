@@ -1,4 +1,4 @@
-"""SoupFold pipeline: standalone runs of the anchor and its peers, token layouts, then SoupFold.
+"""SoupFold pipeline: standalone runs of the anchor and its peers, then SoupFold.
 
   python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --anchor opendde
   python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --anchor opendde \
@@ -8,7 +8,7 @@ Each model runs in its own environment (see config.example.json). Outputs under 
   reprs/<model>/seed_<k>/             trunk representations
   logs/<model>/seed_<k>/              standalone runs without --sample (1 sample, 2 steps)
   samples/standalone/<model>/seed_<k> standalone runs with --sample (5 samples, default steps)
-  layouts/<model>/                    token layouts
+  layouts/<model>/                    token layouts, written by the standalone runs
   samples/soupfold/<anchor>/seed_<k>/ SoupFold results (5 samples, default steps)
   logs/run/                           stdout of every step
 """
@@ -20,7 +20,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
-from soupfold.inputs import MODELS, out_dir  # noqa: E402
+from soupfold.inputs import MODELS  # noqa: E402
 
 SCRIPT = {"af3": "run_af3.py", "protenix": "run_protenix.py", "opendde": "run_opendde.py",
           "esmfold2": "run_esmfold2.py"}
@@ -91,17 +91,13 @@ def main():
     L = os.path.join(W, "logs", "run")
     ks = seeds(a.seeds)
 
-    for k in ks:                                  # 1. standalone runs (representations)
+    for k in ks:                                  # 1. standalone runs (representations, token layouts)
         for m in models:
             mode = [] if m == "af3" else ["--mode", "standalone"]
             run(cfg, m, [SCRIPT[m], *mode, "--seed", str(k), *common, *extra[m]], f"{L}/standalone_{m}_seed{k}.log")
 
-    for m in models:                              # 2. token layouts
-        run(cfg, "protenix", ["token_layout.py", "--pred", out_dir(W, m, "standalone", a.sample, ks[0]), "--model", m,
-                              "--out", os.path.join(W, "layouts")], f"{L}/layout_{m}.log")
-
     b = a.anchor
-    for k in ks:                                  # 3. SoupFold
+    for k in ks:                                  # 2. SoupFold
         run(cfg, b, [SCRIPT[b], "--mode", "soupfold", "--seed", str(k), "--input", *inp, "--workdir", W,
                      "--peers", ",".join(peers), *extra[b]], f"{L}/soupfold_{b}_seed{k}.log")
     print(f"[soupfold] done. SoupFold samples in {W}/samples/soupfold/", flush=True)

@@ -21,9 +21,9 @@ def parser(model, soupfold=True):
     ap.add_argument("--recycling", type=int, default=10)
     ap.add_argument("--out", default=None, help="override the output directory")
     ap.add_argument("--repr-root", default=None, help="default <workdir>/reprs")
+    ap.add_argument("--layouts", default=None, help="token layouts, default <workdir>/layouts")
     if soupfold:
         ap.add_argument("--peers", default=None, help="default: the other three models")
-        ap.add_argument("--layouts", default=None, help="default <workdir>/layouts")
         ap.add_argument("--weights", default=WEIGHTS)
     return ap
 
@@ -39,8 +39,8 @@ def finish(a, model, steps):
     a.sampling_steps = a.sampling_steps or (steps if real else 2)
     a.out = a.out or out_dir(a.workdir, model, a.mode, a.sample, a.seed)
     a.repr_root = a.repr_root or os.path.join(a.workdir, "reprs")
+    a.layouts = a.layouts or os.path.join(a.workdir, "layouts")
     if a.mode == "soupfold":
         a.peers = a.peers.split(",") if a.peers else [m for m in MODELS if m != model]
-        a.layouts = a.layouts or os.path.join(a.workdir, "layouts")
     os.makedirs(a.out, exist_ok=True)
     return a

@@ -15,6 +15,8 @@ import contextlib
 import torch
 from torch import nn
 
+from .. import tokens
+
 
 class _IdentityZ(nn.Module):
     n_blocks = 0
@@ -91,3 +93,10 @@ def seed_diffusion(model, seed):
         yield
     finally:
         model.sample_diffusion = original
+
+
+def token_layout(atom_array):
+    """Token layout (tokens.py) from the atom array of the featurised input: a token is identified
+    by its centre atom."""
+    c = atom_array[atom_array.centre_atom_mask.astype(bool)]
+    return tokens.rows(c.asym_id_int, c.res_id, c.element, c.atom_name)

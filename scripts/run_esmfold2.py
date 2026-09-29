@@ -29,7 +29,15 @@ from esm.models.esmfold2.types import (DNAInput, LigandInput, Modification, Prot
                                        RNAInput, StructurePredictionInput)
 from esm.utils.msa import MSA  # noqa: E402
 
-CHAINS = [chr(c) for c in range(ord("A"), ord("Z") + 1)]
+def chain_ids():
+    """A, B, ..., Z, AA, AB, ..."""
+    n = 0
+    while True:
+        s, k = "", n
+        while k >= 0:
+            s, k = chr(65 + k % 26) + s, k // 26 - 1
+        yield s
+        n += 1
 
 
 def _a3m(path):
@@ -65,7 +73,7 @@ def keyed_msa(paired, unpaired, out, cap=2048):
 
 def to_esm_input(record, workdir):
     """Protenix-format record -> StructurePredictionInput (chains A, B, ... in entity order)."""
-    names, seqs, ci = iter(CHAINS), [], 0
+    names, seqs, ci = chain_ids(), [], 0
     for ent in record["sequences"]:
         (kind, v), = ent.items()
         ids = [next(names) for _ in range(int(v.get("count", 1)))]
@@ -75,10 +83,13 @@ def to_esm_input(record, workdir):
             mods = [Modification(position=m["ptmPosition"] - 1, ccd=m["ptmType"].removeprefix("CCD_"))
                     for m in v.get("modifications") or []]
             seqs.append(ProteinInput(id=ids, sequence=v["sequence"], modifications=mods or None, msa=msa))
-        elif kind == "dnaSequence":
-            seqs.append(DNAInput(id=ids, sequence=v["sequence"]))
-        elif kind == "rnaSequence":
-            seqs.append(RNAInput(id=ids, sequence=v["sequence"], msa=None))
+        elif kind in ("dnaSequence", "rnaSequence"):
+            mods = [Modification(position=m["basePosition"] - 1, ccd=m["modificationType"].removeprefix("CCD_"))
+                    for m in v.get("modifications") or []]
+            if kind == "dnaSequence":
+                seqs.append(DNAInput(id=ids, sequence=v["sequence"], modifications=mods or None))
+            else:
+                seqs.append(RNAInput(id=ids, sequence=v["sequence"], modifications=mods or None, msa=None))
         elif kind in ("ligand", "ion"):
             lig = v.get("ligand") or v.get("ion")
             if lig.startswith("CCD_"):
@@ -145,6 +156,7 @@ def main():
             z = z if z.dim() == 4 else z[None]
             reprs.save(a.repr_root, "esmfold2", a.seed, sid, z[0], lm_dropout=a.lm_dropout,
                        msa_column_mask_rate=a.msa_column_mask_rate, recycling=a.recycling)
+            tokens.save(a.layouts, "esmfold2", sid, H.token_layout(feats, chains), z.shape[1])
         else:
             z0 = torch.from_numpy(reprs.load(a.repr_root, "esmfold2", a.seed, sid)[0]).to(device)
             stats = json.load(open(os.path.join(a.weights, "chan_stats.json")))
