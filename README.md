@@ -34,7 +34,7 @@ channel statistics before diffusion.
 The maps and channel statistics are in `weights/`.
 
 > [!CAUTION]
-> The transfer networks are not trained on RNA or DNA. Complexes with nucleic acids are not supported.
+> The transfer networks are not trained on RNA or DNA and may not generalize to complexes with nucleic acids.
 
 ## Example
 
