@@ -16,10 +16,6 @@
 
 > Co-folding models such as AlphaFold3, Protenix, ESMFold2, and OpenDDE have advanced rapidly, yet no single model consistently performs best across all biomolecular complexes. In this paper, we show that their pair representations encode complementary information that can be transferred across models to improve structure prediction. We introduce SoupFold, which combines pair representations from multiple co-folding models in a common representation space and generates structures from the combined representation. Importantly, SoupFold does not retrain the co-folding models and learns only simple mappings to transfer representations across models. We evaluate SoupFold on antibody-antigen, protein-protein, protein-ligand, molecular glue, GPCR, and oligomeric complex prediction using AlphaFold3, Protenix, ESMFold2, and OpenDDE. By combining representations across models, SoupFold improves over individual co-folding models across the considered benchmarks.
 
-> **Acknowledgement.** This work was generously supported by the
-> [AMD University Program](https://www.amd.com/en/corporate/university-program.html) (AUP), which provided the
-> AMD Instinct GPUs used for our experiments. See [AMD GPU](#amd-gpu) for the settings of each model.
-
 ## How it works
 
 SoupFold improves a co-folding model by combining its pair representation with those of other models.
@@ -151,6 +147,10 @@ Large complexes can exceed GPU memory.
   samples are drawn over several passes.
 
 ## AMD GPU
+
+> **Acknowledgement.** This work was generously supported by the
+> [AMD University Program](https://www.amd.com/en/corporate/university-program.html) (AUP), which provided the
+> AMD Instinct GPUs used for our experiments.
 
 All four models run on AMD Instinct GPUs with ROCm 7.2. We replace only
 the framework of each environment with its ROCm build. The model packages, the weights and the patches in
