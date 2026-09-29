@@ -185,7 +185,7 @@ AlphaFold3 representations. We follow the
 [AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md)
 and [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LICENSE).
 
-Without AlphaFold3, SoupFold still improves over the anchor alone. The table gives FoldBench success
+**Peer selection.** Without AlphaFold3, SoupFold still improves over the anchor alone. The table gives FoldBench success
 rates (%, DockQ above each threshold, per interface) with ESMFold2 as the anchor and different peers:
 mean ± standard deviation over 25 samples, and the top-ranked of the 25 samples in parentheses.
 
