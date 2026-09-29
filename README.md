@@ -173,7 +173,8 @@ the framework of each environment with its ROCm build. The model packages, the w
   inside hipBLASLt. The two OpenDDE variables route its matrix products away from hipBLASLt, and we run
   these systems on MI300X.
 - **ESMFold2.** TransformerEngine, flash-attn and cuEquivariance are CUDA-only, so ESMFold2 uses its
-  PyTorch implementations. The numerics differ slightly.
+  PyTorch implementations. The numerics differ slightly. ROCm reports a diffusion batch that does not fit
+  as `HIP error: invalid configuration argument`, and the batch is halved in the same way as on out of memory.
 
 With these settings, AlphaFold3 on MI300X matches our NVIDIA runs on the 66 largest FoldBench
 protein-protein systems (mean DockQ 0.695 and 0.697 over 82 interfaces).

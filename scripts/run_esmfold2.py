@@ -163,7 +163,12 @@ def main():
             try:
                 with torch.no_grad(), H.trunk_bypass(model, z), H.seed_diffusion(model, a.seed + si):
                     out = model(**feats, **common, num_diffusion_samples=b)
-            except torch.cuda.OutOfMemoryError:
+            except (torch.cuda.OutOfMemoryError, RuntimeError) as exc:
+                # ROCm reports a diffusion batch that does not fit as
+                # "HIP error: invalid configuration argument", not as OutOfMemoryError.
+                if not isinstance(exc, torch.cuda.OutOfMemoryError) and \
+                        "invalid configuration" not in str(exc).lower():
+                    raise
                 out = None
                 gc.collect(); torch.cuda.empty_cache()
                 if cur == 1:
