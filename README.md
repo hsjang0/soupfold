@@ -175,8 +175,7 @@ and [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LI
 }
 ```
 
-Please also cite the co-folding models SoupFold builds on. Using or distributing AlphaFold 3 output
-requires citing the AlphaFold 3 paper.
+Please also cite the co-folding models SoupFold builds on.
 
 ```bibtex
 @article{Abramson2024,
