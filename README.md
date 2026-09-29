@@ -146,25 +146,6 @@ Large complexes can exceed GPU memory.
 - **ESMFold2.** If 5 samples do not fit in one batch, the batch is halved automatically and the
   samples are drawn over several passes.
 
-## AMD GPU
-
-> **Acknowledgement.** This work was generously supported by the
-> [AMD University Program](https://www.amd.com/en/corporate/university-program.html) (AUP), which provided the
-> AMD Instinct GPUs used for our experiments.
-
-All four models run on AMD Instinct GPUs with ROCm 7.2. We replace only
-the framework of each environment with its ROCm build. The model packages, the weights and the patches in
-`patches/` stay as they are. The settings below go into the `env` field of each model in `config.json`.
-
-| model | framework on ROCm | settings |
-|---|---|---|
-| AlphaFold3 | jax / jaxlib 0.10.2, `jax-rocm7-plugin` and `jax-rocm7-pjrt` 0.10.2, tokamax 0.0.8 with `patches/tokamax_rocm.diff` | `TOKAMAX_ROCM_ATTENTION_TRITON=1`, `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_PYTHON_CLIENT_ALLOCATOR=platform` |
-| Protenix | torch 2.7.1+rocm7.2 | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
-| OpenDDE | torch 2.7.1+rocm7.2, triton 3.3.1+rocm | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
-| ESMFold2 | torch 2.10.0+rocm7.2, triton 3.6.0+rocm | `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
-
-For AlphaFold3, apply `patches/tokamax_rocm.diff` inside `site-packages` with `patch -p1`.
-
 ## License
 
 The license of SoupFold fully follows the licenses of its anchor and peer models, listed below. Artifacts
@@ -202,6 +183,25 @@ mean ± standard deviation over 25 samples, and the top-ranked of the 25 samples
 
 AlphaFold3 matters most for protein-protein interfaces, yet SoupFold improves without it too. These are
 interface-level FoldBench results. For higher-order complexes, more peers helped.
+
+## AMD GPU
+
+> **Acknowledgement.** This work was generously supported by the
+> [AMD University Program](https://www.amd.com/en/corporate/university-program.html) (AUP), which provided the
+> AMD Instinct GPUs used for our experiments.
+
+All four models run on AMD Instinct GPUs with ROCm 7.2. We replace only
+the framework of each environment with its ROCm build. The model packages, the weights and the patches in
+`patches/` stay as they are. The settings below go into the `env` field of each model in `config.json`.
+
+| model | framework on ROCm | settings |
+|---|---|---|
+| AlphaFold3 | jax / jaxlib 0.10.2, `jax-rocm7-plugin` and `jax-rocm7-pjrt` 0.10.2, tokamax 0.0.8 with `patches/tokamax_rocm.diff` | `TOKAMAX_ROCM_ATTENTION_TRITON=1`, `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_PYTHON_CLIENT_ALLOCATOR=platform` |
+| Protenix | torch 2.7.1+rocm7.2 | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
+| OpenDDE | torch 2.7.1+rocm7.2, triton 3.3.1+rocm | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
+| ESMFold2 | torch 2.10.0+rocm7.2, triton 3.6.0+rocm | `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
+
+For AlphaFold3, apply `patches/tokamax_rocm.diff` inside `site-packages` with `patch -p1`.
 
 ## Citation
 
