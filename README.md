@@ -152,7 +152,7 @@ Large complexes can exceed GPU memory.
 
 ## AMD GPU
 
-All four models run on AMD Instinct GPUs (MI300X `gfx942`, MI350X `gfx950`) with ROCm 7.2. We replace only
+All four models run on AMD Instinct GPUs with ROCm 7.2. We replace only
 the framework of each environment with its ROCm build. The model packages, the weights and the patches in
 `patches/` stay as they are. The settings below go into the `env` field of each model in `config.json`.
 
@@ -160,10 +160,10 @@ the framework of each environment with its ROCm build. The model packages, the w
 |---|---|---|
 | AlphaFold3 | jax / jaxlib 0.10.2, `jax-rocm7-plugin` and `jax-rocm7-pjrt` 0.10.2, tokamax 0.0.8 with `patches/tokamax_rocm.diff` | `TOKAMAX_ROCM_ATTENTION_TRITON=1`, `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_PYTHON_CLIENT_ALLOCATOR=platform` |
 | Protenix | torch 2.7.1+rocm7.2 | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
-| OpenDDE | torch 2.7.1+rocm7.2, triton 3.3.1+rocm | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512`; on MI350X also `TORCH_BLAS_PREFER_HIPBLASLT=0` and `DISABLE_ADDMM_HIP_LT=1` |
+| OpenDDE | torch 2.7.1+rocm7.2, triton 3.3.1+rocm | `LAYERNORM_TYPE=torch`, `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
 | ESMFold2 | torch 2.10.0+rocm7.2, triton 3.6.0+rocm | `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
 
-- **AlphaFold3.** Apply `patches/tokamax_rocm.diff` inside `site-packages` with `patch -p1`.
+For AlphaFold3, apply `patches/tokamax_rocm.diff` inside `site-packages` with `patch -p1`.
 
 ## License
 
