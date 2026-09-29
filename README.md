@@ -164,7 +164,6 @@ the framework of each environment with its ROCm build. The model packages, the w
 | ESMFold2 | torch 2.10.0+rocm7.2, triton 3.6.0+rocm | `PYTORCH_HIP_ALLOC_CONF=max_split_size_mb:512` |
 
 - **AlphaFold3.** Apply `patches/tokamax_rocm.diff` inside `site-packages` with `patch -p1`.
-- **MI350X.** Protenix and OpenDDE can fail on systems above about 2,000 tokens. We run these on MI300X.
 
 ## License
 
