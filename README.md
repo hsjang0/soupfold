@@ -85,8 +85,7 @@ python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json 
 ```
 
 `--anchor` sets the anchor (Protenix, OpenDDE or ESMFold2) and `--peers` the peers, and only these models
-are run. To run without AlphaFold3, drop `af3` from `--peers` (see [Peer selection](#license)).
-Run once per anchor for several anchors.
+are run.
 
 The pipeline has three steps:
 
