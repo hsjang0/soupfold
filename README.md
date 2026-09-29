@@ -97,7 +97,12 @@ You choose what the standalone runs produce:
   with each model's default steps into `samples/standalone/`, for comparison with SoupFold.
 
 SoupFold itself always draws 5 samples with the anchor's default steps. Use `--seeds 1-5` for
-several seeds and `--anchors` to choose anchors. We rank samples by the anchor's own confidence.
+several seeds, `--anchors` to choose anchors and `--peers` to choose peers. We rank samples by the anchor's
+own confidence. Without AlphaFold3 (see [Peer selection](#license)), for example:
+
+```bash
+python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json --anchors esmfold2 --peers protenix,opendde
+```
 
 ## Outputs
 

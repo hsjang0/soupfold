@@ -67,8 +67,21 @@ def main():
     ap.add_argument("--workdir", default="soupfold_out")
     ap.add_argument("--seeds", default="1", help="e.g. 1 or 1-5")
     ap.add_argument("--anchors", default="protenix,opendde,esmfold2")
+    ap.add_argument("--peers", default=None,
+                    help="e.g. protenix,opendde. Default: for each anchor, the other three models. Only the anchors and "
+                         "these peers are run, so SoupFold without AlphaFold3 needs no AlphaFold3 setup")
     ap.add_argument("--sample", action="store_true", help="standalone runs also sample real structures")
     a = ap.parse_args()
+    anchors = a.anchors.split(",")
+    peers = a.peers.split(",") if a.peers else None
+    for m in anchors + (peers or []):
+        if m not in MODELS:
+            sys.exit(f"[soupfold] unknown model {m!r}, choose from {', '.join(MODELS)}")
+    if "af3" in anchors:
+        sys.exit("[soupfold] AlphaFold3 is a peer only, it cannot be an anchor")
+    if peers and any(not [p for p in peers if p != b] for b in anchors):
+        sys.exit("[soupfold] every anchor needs at least one peer other than itself")
+    models = [m for m in MODELS if peers is None or m in anchors + peers]
     cfg = load_config(a.config)
     inp = [os.path.abspath(x) for x in a.input]
     W = os.path.abspath(a.workdir)
@@ -81,18 +94,19 @@ def main():
     ks = seeds(a.seeds)
 
     for k in ks:                                  # 1. standalone runs (representations)
-        for m in MODELS:
+        for m in models:
             mode = [] if m == "af3" else ["--mode", "standalone"]
             run(cfg, m, [SCRIPT[m], *mode, "--seed", str(k), *common, *extra[m]], f"{L}/standalone_{m}_seed{k}.log")
 
-    for m in MODELS:                              # 2. token layouts
+    for m in models:                              # 2. token layouts
         run(cfg, "protenix", ["token_layout.py", "--pred", out_dir(W, m, "standalone", a.sample, ks[0]), "--model", m,
                               "--out", os.path.join(W, "layouts")], f"{L}/layout_{m}.log")
 
     for k in ks:                                  # 3. SoupFold
-        for b in a.anchors.split(","):
+        for b in anchors:
+            chosen = ["--peers", ",".join(p for p in peers if p != b)] if peers else []
             run(cfg, b, [SCRIPT[b], "--mode", "soupfold", "--seed", str(k), "--input", *inp, "--workdir", W,
-                         *extra[b]], f"{L}/soupfold_{b}_seed{k}.log")
+                         *chosen, *extra[b]], f"{L}/soupfold_{b}_seed{k}.log")
     print(f"[soupfold] done. SoupFold samples in {W}/samples/soupfold/", flush=True)
 
 
