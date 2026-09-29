@@ -6,9 +6,9 @@ centre atom (the atom itself for a token that is one atom). Row i describes z[i]
 
 Two layouts are aligned at the granularity the models agree on:
 
-  chains    matched by their residues, not by position, so the models may order the chains
-            differently. Chains with the same residues are told apart by their atoms (every ligand
-            of one component is one residue). Identical copies pair in order.
+  chains    paired in order: every model is given the chains in the input's entity order. Each pair
+            is checked to have the same residues, and a mismatch raises an error. A chain the peer
+            leaves out (absent_chains) has no counterpart.
   residues  one to one within a matched chain.
   atoms     a residue both models hold per atom (a ligand, a modified residue) pairs atom by atom
             (pair_residue). A residue only one model holds per atom pairs its single token with
@@ -18,7 +18,6 @@ A token without a counterpart is left out. There the anchor keeps its own repres
 """
 import json
 import os
-from collections import defaultdict
 
 import numpy as np
 
@@ -81,23 +80,9 @@ def _chains(layout):
 
 
 def _residues(chain):
-    """What a chain is, wherever a model put it. How a residue is split into tokens is left out:
-    the chain is the same chain when only one model holds a modified residue per atom."""
+    """The residues of a chain, to check that two paired chains agree. How a residue is split into
+    tokens is left out: only one model may hold a modified residue per atom."""
     return tuple(r for r, _ in chain)
-
-
-def _atoms(chain):
-    return tuple(sorted(name for _, atoms in chain for name, _, _ in atoms if name))
-
-
-def _counterpart(chain, candidates):
-    """Take the (rank, chain) of the peer that this chain corresponds to."""
-    atoms = _atoms(chain)
-    if len(candidates) > 1 and atoms:
-        for k, (_, c) in enumerate(candidates):
-            if _atoms(c) == atoms:
-                return candidates.pop(k)
-    return candidates.pop(0)             # one candidate, or copies no atom tells apart: keep the order
 
 
 def pair_residue(ga, gp, smiles, where=""):
@@ -144,23 +129,37 @@ def smiles_chains(record):
     return out
 
 
-def align(anchor, peer, smiles=()):
+def absent_chains(record, model):
+    """Chain ranks of a Protenix-format record that the model leaves out. AlphaFold3 drops a polymer
+    chain made only of unknown residues (X in a protein, N in DNA or RNA)."""
+    out, rank = set(), 0
+    for ent in record["sequences"]:
+        (kind, v), = ent.items()
+        n = int(v.get("count", 1))
+        unknown = {"proteinChain": "X", "dnaSequence": "N", "rnaSequence": "N"}.get(kind)
+        if model == "af3" and unknown and set(v["sequence"]) == {unknown}:
+            out.update(range(rank, rank + n))
+        rank += n
+    return out
+
+
+def align(anchor, peer, smiles=(), absent=()):
     """(idx_anchor, idx_peer): tokens present in both models, in corresponding order.
-    anchor, peer: layouts. smiles: chain ranks of SMILES ligands (smiles_chains)."""
-    pool = defaultdict(list)
-    for rank, chain in enumerate(_chains(peer)):
-        pool[_residues(chain)].append((rank, chain))
-    pairs = []
-    for rank, chain in enumerate(_chains(anchor)):
-        cands = pool[_residues(chain)]
-        if not cands:
-            continue                                                 # the peer has no such chain
-        rank_p, other = _counterpart(chain, cands)
-        is_smiles = rank in smiles and rank_p in smiles
+    anchor, peer: layouts. smiles: chain ranks of SMILES ligands (smiles_chains). absent: chain ranks
+    the peer leaves out (absent_chains)."""
+    ca, cp = _chains(anchor), _chains(peer)
+    pairs, j = [], 0
+    for rank, chain in enumerate(ca):
+        if rank in absent:
+            continue
+        if j == len(cp) or _residues(cp[j]) != _residues(chain):
+            raise ValueError(f"chain {rank + 1} of the anchor and chain {j + 1} of the peer differ, "
+                             f"so the chains cannot be paired")
+        other, j = cp[j], j + 1
         for (_, ga), (_, gp) in zip(chain, other):
-            pairs += pair_residue(ga, gp, is_smiles, f" in chain {rank + 1}")
-    if not pairs:
-        raise ValueError("the two models have no chain in common")
+            pairs += pair_residue(ga, gp, rank in smiles, f" in chain {rank + 1}")
+    if j < len(cp):
+        raise ValueError(f"the peer has {len(cp) - j} chain(s) the anchor lacks, so the chains cannot be paired")
     pairs.sort()
     return (np.asarray([i for i, _ in pairs], dtype=np.int64),
             np.asarray([j for _, j in pairs], dtype=np.int64))

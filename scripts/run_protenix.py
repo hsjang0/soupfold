@@ -88,14 +88,15 @@ def flatten(out, sid, seed):
     return [x["ranking_score"] for x in detail]
 
 
-def soup_inputs(a, sid, device, smiles):
+def soup_inputs(a, sid, device, record):
     z, s = reprs.load(a.repr_root, a.model, a.seed, sid)
     s, z = torch.from_numpy(s).to(device), torch.from_numpy(z).to(device)
     stats = json.load(open(os.path.join(a.weights, "chan_stats.json")))
     zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.peers}
     fmap = {t: M.load_map(a.weights, t, a.model, device) for t in a.peers}
     lay = {m: tokens.load(a.layouts, m, sid, x.shape[0]) for m, x in {a.model: z, **zt}.items()}
-    tmaps = {t: tokens.align(lay[a.model], lay[t], smiles) for t in a.peers}
+    smiles = tokens.smiles_chains(record)
+    tmaps = {t: tokens.align(lay[a.model], lay[t], smiles, tokens.absent_chains(record, t)) for t in a.peers}
     return s, mix.soup(z, zt, fmap, stats, a.model, token_maps=tmaps, device=device)
 
 
@@ -132,7 +133,7 @@ def main(model="protenix"):
                            box["s"].squeeze(0) if box["s"].dim() == 3 else box["s"], recycling=a.recycling)
                 tokens.save(a.layouts, model, sid, H.token_layout(atom_array), box["z"].shape[-2])
             else:
-                s, z = soup_inputs(a, sid, runner.device, tokens.smiles_chains(inputs.load(jpath)))
+                s, z = soup_inputs(a, sid, runner.device, inputs.load(jpath))
                 if "af3" in a.peers:
                     reprs.copy_terms(a.repr_root, a.seed, a.out)
                 if model == "opendde":                # OpenDDE consumes the trunk output in bf16
