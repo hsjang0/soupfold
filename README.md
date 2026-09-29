@@ -33,6 +33,9 @@ peer $m$ to the anchor. This code uses equal weights ($w_m = 1$). $H$ is scaled 
 channel statistics before diffusion.
 The maps and channel statistics are in `weights/`.
 
+> [!CAUTION]
+> The transfer networks are not trained on RNA or DNA. Complexes with nucleic acids are not supported.
+
 ## Example
 
 <p align="center"><img src="assets/9mnb_example.png" width="100%"></p>
