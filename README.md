@@ -81,12 +81,11 @@ weights and data files. Then run:
 
 ```bash
 python scripts/soupfold.py --config config.json --input examples/9mnb/9mnb.json \
-    --anchors protenix,opendde,esmfold2 --peers af3,protenix,opendde,esmfold2
+    --anchors opendde --peers af3,protenix,esmfold2
 ```
 
-`--anchors` sets the anchors and `--peers` the peers. Each anchor uses every listed peer other than
-itself, and only the listed models are run. To run without AlphaFold3, drop `af3` from `--peers`
-(see [Peer selection](#license)).
+`--anchors` sets the anchor and `--peers` the peers, and only these models are run. To run without
+AlphaFold3, drop `af3` from `--peers` (see [Peer selection](#license)).
 
 The pipeline has three steps:
 
