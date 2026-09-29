@@ -151,7 +151,7 @@ def main():
             zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.peers}
             fmap = {t: M.load_map(a.weights, t, "esmfold2", device) for t in a.peers}
             lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
-            tmaps = {t: tokens.align(lay("esmfold2"), lay(t)) for t in a.peers}
+            tmaps = {t: tokens.align(lay("esmfold2"), lay(t), tokens.smiles_chains(rec)) for t in a.peers}
             z = mix.soup(z0, zt, fmap, stats, "esmfold2", token_maps=tmaps, device=device)[None]
             if "af3" in a.peers:
                 reprs.copy_terms(a.repr_root, a.seed, a.out)

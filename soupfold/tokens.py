@@ -3,11 +3,8 @@
 A model's token layout is read from any structure it predicted, in file order: one token
 per polymer residue, one token per non-polymer (ligand) atom. A residue is identified by
 (chain rank, residue offset within the chain), which is independent of how a model names its
-chains or numbers its residues. Within a ligand residue (see _pair_ligand), atoms are paired by
-atom name when both models name the heavy atoms alike. Models name the atoms of a SMILES ligand
-differently (ESMFold2 does not use AF3's N1, C1, C2, ...) but all keep the RDKit MolFromSmiles
-atom order, so when the names differ, atoms are paired by position if their elements come in the
-same order, with or without the hydrogens a model keeps (ESMFold2 keeps isotopic ones).
+chains or numbers its residues. Ligand atoms pair by name for CCD ligands and by position for
+SMILES ligands (see _pair_ligand). Which ligands are SMILES is read from the input (smiles_chains).
 
 Token identity does not depend on MSA, templates or seed, so one prediction per model and
 system is enough.
@@ -63,21 +60,43 @@ def _residues(rows, keys):
 HYDROGEN = ("H", "D")
 
 
-def _pair_ligand(ra, rp, ia, ip):
-    """Token pairs within one ligand residue. ra, rp: layout rows; ia, ip: the residue's token indices."""
+def _pair_ligand(ra, rp, ia, ip, smiles):
+    """Token pairs within one ligand residue. ra, rp: layout rows. ia, ip: the residue's token indices.
+
+    A CCD ligand has the same atom names in every model and pairs by name. A SMILES ligand is named
+    differently by each model (ESMFold2 does not use AF3's N1, C1, C2, ...), but every model keeps the
+    RDKit MolFromSmiles atom order, so it pairs by position when the elements agree, with or without
+    the hydrogens a model keeps (ESMFold2 keeps isotopic ones). A SMILES ligand whose heavy atoms still
+    differ between the models cannot be aligned and raises an error."""
     heavy = lambda rows, idx: [i for i in idx if rows[i][2] not in HYDROGEN]
     ha, hp = heavy(ra, ia), heavy(rp, ip)
-    if {ra[i][3] for i in ha} != {rp[j][3] for j in hp}:           # heavy-atom names differ
+    if smiles and {ra[i][3] for i in ha} != {rp[j][3] for j in hp}:
         if [ra[i][2] for i in ia] == [rp[j][2] for j in ip]:
             return list(zip(ia, ip))                               # same elements in order: every atom
         if [ra[i][2] for i in ha] == [rp[j][2] for j in hp]:
             return list(zip(ha, hp))                               # same once hydrogens are dropped
+        raise ValueError(f"SMILES ligand in chain {ra[ia[0]][0]}: the models disagree on its heavy atoms "
+                         f"({len(ha)} vs {len(hp)}), so its tokens cannot be aligned")
     by_name = {rp[j][3]: j for j in ip}
     return [(i, by_name[ra[i][3]]) for i in ia if ra[i][3] in by_name]
 
 
-def align(anchor_rows, peer_rows):
-    """(idx_anchor, idx_peer): tokens present in both models, in corresponding order."""
+def smiles_chains(record):
+    """Chain ranks of the ligands a Protenix-format record gives as SMILES. Every model lays out the
+    chains in entity order, the copies of an entity in a row."""
+    out, rank = set(), 0
+    for ent in record["sequences"]:
+        (kind, v), = ent.items()
+        n = int(v.get("count", 1))
+        if kind == "ligand" and not str(v["ligand"]).startswith("CCD_"):
+            out.update(range(rank, rank + n))
+        rank += n
+    return out
+
+
+def align(anchor_rows, peer_rows, smiles=()):
+    """(idx_anchor, idx_peer): tokens present in both models, in corresponding order.
+    smiles: chain ranks of SMILES ligands (smiles_chains)."""
     ka, kp = fingerprint(anchor_rows), fingerprint(peer_rows)
     single = {k: j for j, k in enumerate(kp) if k[2] is None}
     pairs = [(i, single[k]) for i, k in enumerate(ka) if k[2] is None and k in single]
@@ -86,7 +105,7 @@ def align(anchor_rows, peer_rows):
         ip = rp.get(res)
         if not ip:
             continue
-        pairs += _pair_ligand(anchor_rows, peer_rows, ia, ip)
+        pairs += _pair_ligand(anchor_rows, peer_rows, ia, ip, res[0] in smiles)
     pairs.sort()
     ib = np.asarray([i for i, _ in pairs], dtype=np.int64)
     it = np.asarray([j for _, j in pairs], dtype=np.int64)
