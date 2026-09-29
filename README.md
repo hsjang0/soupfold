@@ -150,8 +150,8 @@ Large complexes can exceed GPU memory.
 
 The license of SoupFold fully follows the licenses of its anchor and peer models, listed below. Artifacts
 unique to SoupFold (code, transfer networks and example outputs) are also subject to these licenses.
-SoupFold with AlphaFold3 as a peer cannot run without the AlphaFold 3 model parameters, so its use is fully
-bound by the AlphaFold 3 terms.
+SoupFold with AlphaFold3 as a peer cannot run without the AlphaFold3 model parameters, so its use is fully
+bound by the AlphaFold3 terms.
 
 | model | code | parameters |
 |---|---|---|
@@ -160,9 +160,9 @@ bound by the AlphaFold 3 terms.
 | OpenDDE | [Apache-2.0](https://github.com/aurekaresearch/OpenDDE/blob/main/LICENSE) | [Apache-2.0](https://huggingface.co/aurekaresearch/OpenDDE) |
 | ESMFold2 | [MIT](https://github.com/Biohub/esm) | [MIT](https://huggingface.co/biohub/ESMFold2) (ESMFold2), [MIT](https://huggingface.co/biohub/ESMC-6B) and the [Biohub Acceptable Use Policy](https://biohub.org/acceptable-use-policy/) (ESMC-6B) |
 
-AlphaFold 3 is used for non-commercial research only, as a peer and never as an anchor. This work does not
-train a model similar to AlphaFold 3. It trains only representation transfer networks, and none of them predicts
-AlphaFold 3 representations. We follow the
+AlphaFold3 is used for non-commercial research only, as a peer and never as an anchor. This work does not
+train a model similar to AlphaFold3. It trains only representation transfer networks, and none of them predicts
+AlphaFold3 representations. We follow the
 [AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md)
 and [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LICENSE).
 
