@@ -94,8 +94,8 @@ def soup_inputs(a, sid, device, smiles):
     stats = json.load(open(os.path.join(a.weights, "chan_stats.json")))
     zt = {t: torch.from_numpy(reprs.load(a.repr_root, t, a.seed, sid)[0]) for t in a.peers}
     fmap = {t: M.load_map(a.weights, t, a.model, device) for t in a.peers}
-    lay = lambda m: json.load(open(os.path.join(a.layouts, m, f"{sid}.json")))
-    tmaps = {t: tokens.align(lay(a.model), lay(t), smiles) for t in a.peers}
+    lay = {m: tokens.load(a.layouts, m, sid, x.shape[0]) for m, x in {a.model: z, **zt}.items()}
+    tmaps = {t: tokens.align(lay[a.model], lay[t], smiles) for t in a.peers}
     return s, mix.soup(z, zt, fmap, stats, a.model, token_maps=tmaps, device=device)
 
 

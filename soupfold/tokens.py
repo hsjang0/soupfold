@@ -1,41 +1,53 @@
 """Token alignment across co-folding models.
 
-A model's token layout is read from any structure it predicted, in file order: one token
-per polymer residue, one token per non-polymer (ligand) atom. A residue is identified by
-(chain rank, residue offset within the chain), which is independent of how a model names its
+A model's token layout is read from any structure it predicted, in file order: one token per
+standard polymer residue, one token per atom of everything else (ligands, ions, and the modified
+residues inside a polymer chain, which every model tokenises per atom). A residue is identified by
+(chain rank, residue index within the chain), which is independent of how a model names its
 chains or numbers its residues. Ligand atoms pair by name for CCD ligands and by position for
 SMILES ligands (see _pair_ligand). Which ligands are SMILES is read from the input (smiles_chains).
 
 Token identity does not depend on MSA, templates or seed, so one prediction per model and
-system is enough.
+system is enough. A layout must have as many tokens as the model's representation (see load).
 """
 import json
+import os
 from collections import defaultdict
 
 import numpy as np
 
 
+# Residues a model holds as one token when they are part of a polymer chain.
+STANDARD = frozenset("ALA ARG ASN ASP CYS GLN GLU GLY HIS ILE LEU LYS MET PHE PRO SER THR TRP TYR VAL UNK "
+                     "A C G U N DA DC DG DT DN".split())
+
+
 def layout(cif_path):
-    """[(chain, residue number, element, atom name)] in token order."""
+    """[(chain, residue index, element, atom name)] in token order.
+
+    A residue is one token when it has a standard name and is written as ATOM. Anything else is one
+    token per atom: a ligand or ion, a modified residue (HYP, SEP, ACE, ...), and an amino acid or
+    nucleotide given as a ligand, which the models write as HETATM."""
     import gemmi
-    st = gemmi.read_structure(cif_path)
-    st.setup_entities()
     out = []
-    for ch in st[0]:
-        poly = ch.get_polymer()
-        if poly.length() > 0:
-            for res in poly:
-                at = res[0] if len(res) else None
-                out.append([ch.name, res.seqid.num, at.element.name if at else "", at.name if at else ""])
-        else:
-            for res in ch:
-                for at in res:
-                    out.append([ch.name, res.seqid.num, at.element.name, at.name])
+    for ch in gemmi.read_structure(cif_path)[0]:
+        k = 0
+        for res in ch:
+            if res.name in STANDARD and res.het_flag != "H":
+                out.append([ch.name, k, res[0].element.name, res[0].name])
+            else:
+                seen = set()             # ESMFold2 writes a ligand of several components as one
+                for at in res:           # residue: a repeated atom name starts the next component
+                    if at.name in seen:
+                        k, seen = k + 1, set()
+                    seen.add(at.name)
+                    out.append([ch.name, k, at.element.name, at.name])
+            k += 1
     return out
 
 
 def fingerprint(rows):
-    """(chain rank, residue offset, atom name if the residue has several tokens) per token."""
+    """(chain rank, residue index, atom name if the residue has several tokens) per token."""
     rank, first, count = {}, {}, defaultdict(int)
     for a, r, _e, _n in rows:
         rank.setdefault(a, len(rank))
@@ -48,8 +60,19 @@ def save_layout(cif_path, out_json):
     json.dump(layout(cif_path), open(out_json, "w"))
 
 
+def load(root, model, system, n_tokens):
+    """The layout token_layout.py wrote for one model and system. n_tokens: size of the model's
+    representation. A layout of another length would pair the wrong tokens, so it is refused."""
+    rows = json.load(open(os.path.join(root, model, f"{system}.json")))
+    if len(rows) != n_tokens:
+        raise ValueError(f"{system}: the {model} token layout has {len(rows)} tokens, its representation "
+                         f"{n_tokens}. Write the layout again with scripts/token_layout.py; if the two "
+                         f"still differ, the tokens of this system cannot be aligned")
+    return rows
+
+
 def _residues(rows, keys):
-    """(chain rank, residue offset) -> token indices, for residues that span several tokens."""
+    """(chain rank, residue index) -> token indices, for residues that span several tokens."""
     out = defaultdict(list)
     for i, k in enumerate(keys):
         if k[2] is not None:
@@ -61,7 +84,7 @@ HYDROGEN = ("H", "D")
 
 
 def _pair_ligand(ra, rp, ia, ip, smiles):
-    """Token pairs within one ligand residue. ra, rp: layout rows. ia, ip: the residue's token indices.
+    """Token pairs within one residue held per atom (a ligand, a modified residue). ra, rp: layout rows. ia, ip: the residue's token indices.
 
     A CCD ligand has the same atom names in every model and pairs by name. A SMILES ligand is named
     differently by each model (ESMFold2 does not use AF3's N1, C1, C2, ...), but every model keeps the
@@ -78,6 +101,9 @@ def _pair_ligand(ra, rp, ia, ip, smiles):
         raise ValueError(f"SMILES ligand in chain {ra[ia[0]][0]}: the models disagree on its heavy atoms "
                          f"({len(ha)} vs {len(hp)}), so its tokens cannot be aligned")
     by_name = {rp[j][3]: j for j in ip}
+    if len(by_name) < len(ip) or len({ra[i][3] for i in ia}) < len(ia):
+        raise ValueError(f"chain {ra[ia[0]][0]}: atom names repeat within a residue, so its tokens cannot "
+                         f"be paired by name; write the layouts again with scripts/token_layout.py")
     return [(i, by_name[ra[i][3]]) for i in ia if ra[i][3] in by_name]
 
 
