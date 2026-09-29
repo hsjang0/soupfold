@@ -84,7 +84,8 @@ HYDROGEN = ("H", "D")
 
 
 def _pair_ligand(ra, rp, ia, ip, smiles):
-    """Token pairs within one residue held per atom (a ligand, a modified residue). ra, rp: layout rows. ia, ip: the residue's token indices.
+    """Token pairs within one residue held per atom (a ligand, a modified residue).
+    ra, rp: layout rows. ia, ip: the residue's token indices.
 
     A CCD ligand has the same atom names in every model and pairs by name. A SMILES ligand is named
     differently by each model (ESMFold2 does not use AF3's N1, C1, C2, ...), but every model keeps the
