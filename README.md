@@ -33,8 +33,7 @@ peer $m$ to the anchor. This code uses equal weights ($w_m = 1$). $H$ is scaled 
 channel statistics before diffusion.
 The maps and channel statistics are in `weights/`.
 
-> [!CAUTION]
-> The transfer networks are not trained on RNA or DNA and may not generalize to complexes with nucleic acids.
+> **Note.** The transfer networks are not trained on RNA or DNA and may not generalize to complexes with nucleic acids.
 
 ## Example
 
@@ -57,7 +56,8 @@ the first Fab, ESMFold2 only the second, and Protenix neither. SoupFold docks bo
 Each model runs in its own Python environment.
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
-> **Note.** SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). We remove the two
+> [!CAUTION]
+> SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). We remove the two
 > known differences with the patches in `patches/`. The patches are optional, and SoupFold works without
 > them through the token maps.
 > Patches: `patches/protenix_parser.diff` (Protenix), `patches/opendde_parser.diff` (OpenDDE), `patches/af3_atom_layout.diff` (AlphaFold3).
