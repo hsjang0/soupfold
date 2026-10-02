@@ -58,7 +58,7 @@ Representations are captured and injected at runtime by `soupfold/hooks/`.
 
 > [!CAUTION]
 > SoupFold aligns the models' tokens with token maps (`soupfold/tokens.py`). We remove the two
-> known differences with the patches in `patches/`. The patches are optional, and SoupFold works without
+> known differences with the patches in `patches/`. The patches are optional, and SoupFold can work without
 > them through the token maps.
 > Patches: `patches/protenix_parser.diff` (Protenix), `patches/opendde_parser.diff` (OpenDDE), `patches/af3_atom_layout.diff` (AlphaFold3).
 
