@@ -7,7 +7,7 @@ store (cutoff 2021-09-30, at most 4). Stores z = pair_embeddings, s = single_emb
 
   python scripts/run_af3.py --input examples/9mnb/9mnb.json --model-dir <af3> --template-mmcif-dir <mmcif>
 
-Run with AlphaFold3 v3.0.1 on PYTHONPATH (repo root and src/), with the atom_layout patch applied.
+Run with AlphaFold3 (third_party/alphafold3) on PYTHONPATH (repo root and src/).
 """
 import contextlib
 import datetime

@@ -76,6 +76,28 @@ relative to the JSON file. `examples/9mnb/` is a ready-to-run antibody example f
   ...]}]
 ```
 
+## Installation
+
+```bash
+git clone --recursive https://github.com/hsjang0/soupfold.git
+cd soupfold
+# optional patches (see the caution above)
+patch -p1 -d third_party/alphafold3 < patches/af3_atom_layout.diff
+patch -p1 -d third_party/Protenix   < patches/protenix_parser.diff
+patch -p1 -d third_party/OpenDDE    < patches/opendde_parser.diff
+```
+
+Then install each model from its folder in `third_party/`, in its own environment, following its own guide.
+
+| model | install |
+|---|---|
+| AlphaFold3 | `third_party/alphafold3/docs/installation.md`, and request the model parameters from Google DeepMind |
+| Protenix | `pip install -e third_party/Protenix` |
+| OpenDDE | `uv pip install --python <env> --torch-backend cu126 -e "third_party/OpenDDE[gpu]"` |
+| ESMFold2 | `pip install -e third_party/esm` |
+
+An editable install (`-e`) keeps the patches in effect.
+
 ## Quick start
 
 Copy `config.example.json` to `config.json` and fill in each model's Python environment,

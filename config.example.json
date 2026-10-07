@@ -1,7 +1,7 @@
 {
   "af3": {
     "python": "/path/to/alphafold3_venv/bin/python",
-    "pythonpath": ["/path/to/alphafold3", "/path/to/alphafold3/src"],
+    "pythonpath": ["./third_party/alphafold3", "./third_party/alphafold3/src"],
     "env": {"XLA_PYTHON_CLIENT_PREALLOCATE": "false"},
     "args": ["--model-dir", "/path/to/af3_params"]
   },
