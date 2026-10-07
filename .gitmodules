@@ -1,0 +1,12 @@
+[submodule "third_party/alphafold3"]
+	path = third_party/alphafold3
+	url = https://github.com/google-deepmind/alphafold3.git
+[submodule "third_party/Protenix"]
+	path = third_party/Protenix
+	url = https://github.com/bytedance/Protenix.git
+[submodule "third_party/OpenDDE"]
+	path = third_party/OpenDDE
+	url = https://github.com/aurekaresearch/OpenDDE.git
+[submodule "third_party/esm"]
+	path = third_party/esm
+	url = https://github.com/Biohub/esm.git

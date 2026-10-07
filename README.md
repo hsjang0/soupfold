@@ -48,12 +48,13 @@ the first Fab, ESMFold2 only the second, and Protenix neither. SoupFold docks bo
 
 | model | code | parameters | role |
 |---|---|---|---|
-| AlphaFold3 | v3.0.1 | `af3.bin` (official weights) | peer |
-| Protenix | 2.0.0 | `protenix_base_default_v1.0.0` | anchor, peer |
-| OpenDDE | 1.1.0 | `opendde.pt` ([aurekaresearch/OpenDDE](https://huggingface.co/aurekaresearch/OpenDDE) @ `eddd563`) | anchor, peer |
-| ESMFold2 | esm 3.4.0 | [biohub/ESMFold2](https://huggingface.co/biohub/ESMFold2) @ `8fc3ff4`, [biohub/ESMC-6B](https://huggingface.co/biohub/ESMC-6B) @ `45b0fa5` | anchor, peer |
+| AlphaFold3 | [3.0.1 @ `22b9ab8`](https://github.com/google-deepmind/alphafold3/tree/22b9ab80d343d2136ca8aae79b1888fcdc32554d) | `af3.bin` (official weights) | peer |
+| Protenix | [v2.0.0](https://github.com/bytedance/Protenix/tree/v2.0.0) | `protenix_base_default_v1.0.0` | anchor, peer |
+| OpenDDE | [v1.1.0](https://github.com/aurekaresearch/OpenDDE/tree/v1.1.0) | `opendde.pt` ([aurekaresearch/OpenDDE](https://huggingface.co/aurekaresearch/OpenDDE) @ `eddd563`) | anchor, peer |
+| ESMFold2 | [esm v3.4.0](https://github.com/Biohub/esm/tree/v3.4.0) | [biohub/ESMFold2](https://huggingface.co/biohub/ESMFold2) @ `8fc3ff4`, [biohub/ESMC-6B](https://huggingface.co/biohub/ESMC-6B) @ `45b0fa5` | anchor, peer |
 
-Each model runs in its own Python environment.
+Each model runs in its own Python environment. The code of the four models is linked in `third_party/` at
+these versions: clone with `git clone --recursive`, or run `git submodule update --init` in a clone.
 Representations are captured and injected at runtime by `soupfold/hooks/`.
 
 > [!CAUTION]
