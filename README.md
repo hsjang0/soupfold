@@ -159,7 +159,8 @@ Samples go to `<workdir>/samples/soupfold/opendde/seed_<k>/`.
 The environment uses torch 2.11 as esm 3.4.0 requires, with the data stack OpenDDE and Protenix pin, and not the torch 2.7.1
 those two pin. Results agree with the two-step pipeline up to run-to-run variation, not bit for bit: on `examples/9mnb`
 (seed 1) the top sample scores DockQ B-D 0.617 / B-E 0.731 two-step and 0.645 / 0.765 and 0.648 / 0.762 in two pack runs.
-A larger benchmark has not been run with this code path.
+On CoFold Arena (422 antibody-antigen targets, seed 1, no templates, ESMFold2 pairing its MSA by taxonomy) the mean DockQ is
+0.396 with this model and 0.395 with the multi-step pipeline (paired difference +0.001, 95% CI -0.008 to +0.011).
 
 ## Outputs
 
