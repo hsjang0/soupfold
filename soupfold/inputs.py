@@ -3,7 +3,6 @@ import json
 import os
 
 PATH_KEYS = ("unpairedMsaPath", "pairedMsaPath", "templatesPath")
-MODELS = ("af3", "protenix", "opendde", "esmfold2")
 
 
 def load(json_path):
@@ -26,13 +25,3 @@ def resolved(json_path, workdir):
     out = os.path.join(workdir, f"{rec['name']}.input.json")
     json.dump([rec], open(out, "w"), indent=1)
     return out
-
-
-def out_dir(workdir, model, mode, sample, seed):
-    """samples/soupfold/<model> for SoupFold, samples/standalone/<model> for sampled standalone runs,
-    logs/<model> for standalone runs that only store representations."""
-    if mode == "soupfold":
-        sub = os.path.join("samples", "soupfold", model)
-    else:
-        sub = os.path.join("samples", "standalone", model) if sample else os.path.join("logs", model)
-    return os.path.join(workdir, sub, f"seed_{seed}")

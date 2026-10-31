@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "soupfold-pack"
+version = "1.0.0"
+description = "SoupFold as one model: OpenDDE anchor, ESMFold2 and Protenix peers"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "torch==2.11.0",
+  "numpy==2.4.1",
+  "pandas==2.3.1",
+  "rdkit==2025.9.3",
+  "biopython==1.85",
+  "biotite==1.4.0",
+  "scikit-learn==1.7.1",
+  "scipy>=1.9.0",
+  "ml_collections==1.1.0",
+  "tqdm==4.67.1",
+  "optree==0.17.0",
+  "pydantic>=2.0.0",
+  "networkx>=3.4.2",
+  "click>=8.1.0",
+  "packaging>=23.2",
+  "requests>=2.31.0",
+  "PyYAML==6.0.2",
+  "lmdb",
+  "orjson",
+  "zstandard",
+  "transformers>=4.57.6,<5.0.0",
+  "einops",
+  "attrs",
+  "msgpack-numpy",
+  "brotli",
+  "cloudpathlib",
+  "httpx",
+  "tenacity",
+  "zstd",
+  "huggingface_hub",
+  "safetensors",
+  "accelerate",
+  "kalign-python==3.4.8",
+]
+
+[project.scripts]
+soupfold-pack = "soupfold.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["soupfold*"]
+
+[tool.setuptools.package-data]
+"soupfold.models.opendde.config" = ["model_manifest.json"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

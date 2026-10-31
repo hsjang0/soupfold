@@ -1,46 +1,57 @@
-"""Arguments shared by the per-model scripts."""
+"""SoupFold in one run from one checkpoint: OpenDDE anchor, ESMFold2 and Protenix peers.
+
+  soupfold-pack --input examples/9mnb/9mnb.json
+
+The checkpoint and the CCD data come from Hugging Face on the first run.
+Outputs: <workdir>/samples/soupfold/opendde/seed_<k>/<system>__s<i>.cif, <system>__conf.json.
+"""
 import argparse
 import os
 
-from .inputs import MODELS, out_dir
+CHECKPOINT = ("hyosoon0/soup-opendde-pack", "soup_opendde_pack.pt")
+COMMON = ("aurekaresearch/OpenDDE", "eddd563ce96571f784012edd8f045181c8f8627d")  # common/: CCD data, release dates
 
-WEIGHTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "weights")
+
+def seeds(spec):
+    out = []
+    for part in spec.split(","):
+        a, _, b = part.partition("-")
+        out += list(range(int(a), int(b or a) + 1))
+    return out
 
 
-def parser(model, soupfold=True):
-    ap = argparse.ArgumentParser()
-    if soupfold:
-        ap.add_argument("--mode", choices=["standalone", "soupfold"], default="standalone")
+def main():
+    ap = argparse.ArgumentParser(description="Fold complexes with SoupFold (OpenDDE + ESMFold2 + Protenix).")
     ap.add_argument("--input", nargs="+", required=True, help="Protenix-format system JSON(s)")
-    ap.add_argument("--workdir", default=".", help="outputs go under samples/, logs/, reprs/, layouts/ here")
-    ap.add_argument("--seed", type=int, default=1)
-    ap.add_argument("--sample", action="store_true",
-                    help="standalone: sample real structures into samples/standalone/ instead of logs/")
-    ap.add_argument("--samples", type=int, default=None)
-    ap.add_argument("--sampling-steps", type=int, default=None)
-    ap.add_argument("--recycling", type=int, default=10)
-    ap.add_argument("--out", default=None, help="override the output directory")
-    ap.add_argument("--repr-root", default=None, help="default <workdir>/reprs")
-    ap.add_argument("--layouts", default=None, help="token layouts, default <workdir>/layouts")
-    if soupfold:
-        ap.add_argument("--peers", default=None, help="default: the other three models")
-        ap.add_argument("--weights", default=WEIGHTS)
-    return ap
+    ap.add_argument("--workdir", default="soupfold_out")
+    ap.add_argument("--seeds", default="1", help="e.g. 1 or 1-5")
+    ap.add_argument("--checkpoint", help=f"default: {CHECKPOINT[0]} on Hugging Face")
+    ap.add_argument("--protenix-root", help=f"holds common/ (CCD data, release dates); default: {COMMON[0]} on Hugging Face")
+    ap.add_argument("--template-mmcif-dir", help="default: mmcif/ next to the first input, if there is one")
+    ap.add_argument("--chunk-thresholds", help='OpenDDE trunk chunk sizes by token count, e.g. \'{"1024":64,"2048":16}\'')
+    a = ap.parse_args()
+
+    import torch
+    if not torch.cuda.is_available():
+        raise SystemExit("soupfold-pack needs an NVIDIA GPU: torch sees none.")
+    from huggingface_hub import hf_hub_download, snapshot_download
+    workdir = os.path.abspath(a.workdir)
+    checkpoint = a.checkpoint or hf_hub_download(*CHECKPOINT)
+    protenix_root = a.protenix_root or snapshot_download(COMMON[0], revision=COMMON[1], allow_patterns="common/*")
+    mmcif = a.template_mmcif_dir or os.path.join(os.path.dirname(os.path.abspath(a.input[0])), "mmcif")
+    if not os.path.isdir(mmcif):                         # OpenDDE asserts the directory exists, used or not
+        mmcif = os.path.join(workdir, "template_mmcif")
+        os.makedirs(mmcif, exist_ok=True)
+
+    from soupfold.pack import SoupOpenDDE
+    data = dict(protenix_root=protenix_root, template_mmcif_dir=os.path.abspath(mmcif), workdir=workdir,
+                chunk_thresholds=a.chunk_thresholds)
+    pack = SoupOpenDDE.from_pack(checkpoint, data)
+    for k in seeds(a.seeds):
+        for jpath in a.input:
+            pack.predict(jpath, seed=k)
+    print(f"done. Samples in {workdir}/samples/soupfold/opendde/", flush=True)
 
 
-def finish(a, model, steps):
-    """Fill defaults. Standalone runs are for the representations: without --sample they draw one
-    sample with 2 diffusion steps (noise) into logs/. SoupFold and --sample use 5 samples and the
-    model's default steps."""
-    a.model = model
-    a.mode = getattr(a, "mode", "standalone")
-    real = a.mode == "soupfold" or a.sample
-    a.samples = a.samples or (5 if real else 1)
-    a.sampling_steps = a.sampling_steps or (steps if real else 2)
-    a.out = a.out or out_dir(a.workdir, model, a.mode, a.sample, a.seed)
-    a.repr_root = a.repr_root or os.path.join(a.workdir, "reprs")
-    a.layouts = a.layouts or os.path.join(a.workdir, "layouts")
-    if a.mode == "soupfold":
-        a.peers = a.peers.split(",") if a.peers else [m for m in MODELS if m != model]
-    os.makedirs(a.out, exist_ok=True)
-    return a
+if __name__ == "__main__":
+    main()
