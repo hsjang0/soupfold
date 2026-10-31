@@ -128,6 +128,16 @@ You choose what the standalone runs produce:
 SoupFold itself always draws 5 samples with the anchor's default steps. Use `--seeds 1-5` for
 several seeds. We rank samples by the anchor's own confidence.
 
+## One model, one checkpoint
+
+The [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack#one-model-one-checkpoint-soup-opendde-pack)
+branch runs OpenDDE as the anchor with ESMFold2 and Protenix as peers as one model, from one checkpoint in one Python
+environment. There is no standalone step and no representation is written. The checkpoint is at
+[hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack) (18 GB), with each part's license, source and
+changes in its [`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md). It does not use AlphaFold3.
+On CoFold Arena (422 antibody-antigen targets, seed 1, no templates, ESMFold2 pairing its MSA by taxonomy) the mean DockQ is
+0.396 with this model and 0.395 with the multi-step pipeline. Installation and usage are in that branch's README.
+
 ## Outputs
 
 Everything goes under `--workdir` (default `soupfold_out/`):
