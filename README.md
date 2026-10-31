@@ -130,7 +130,7 @@ several seeds. We rank samples by the anchor's own confidence.
 
 ## One model, one checkpoint
 
-The [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack#one-model-one-checkpoint-soup-opendde-pack)
+The [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack)
 branch runs OpenDDE as the anchor with ESMFold2 and Protenix as peers as one model, from one checkpoint in one Python
 environment. There is no standalone step and no representation is written. The checkpoint is at
 [hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack) (18 GB), with each part's license, source and
