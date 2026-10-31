@@ -128,6 +128,39 @@ You choose what the standalone runs produce:
 SoupFold itself always draws 5 samples with the anchor's default steps. Use `--seeds 1-5` for
 several seeds. We rank samples by the anchor's own confidence.
 
+## One model, one checkpoint: `soup-opendde-pack`
+
+This branch adds `SoupOpenDDE` (`soupfold/pack.py`): OpenDDE as the anchor, ESMFold2 and Protenix as peers, and the two maps
+as one `nn.Module`, saved as one checkpoint and run in one Python environment. There is no standalone step and no
+representation is written: the peers' trunks and OpenDDE's trunk run in one process, z is mixed in memory, and OpenDDE
+goes on to diffusion and confidence. The other three models wait in CPU memory while one runs.
+
+```bash
+git clone --recursive -b soup-opendde-pack https://github.com/hsjang0/soupfold.git && cd soupfold
+patch -p1 -d third_party/Protenix < patches/protenix_parser.diff
+patch -p1 -d third_party/OpenDDE  < patches/opendde_parser.diff
+uv venv --python 3.12 soup_env
+uv pip install --python soup_env/bin/python --index-strategy unsafe-best-match -r requirements_pack.txt
+uv pip install --python soup_env/bin/python --index-strategy unsafe-best-match \
+    --extra-index-url https://download.pytorch.org/whl/cu128 -e third_party/esm -r requirements_pack.txt
+
+# once: bundle the upstream weights into one file (18 GB, with ESMC-6B in bf16 as it runs)
+soup_env/bin/python scripts/build_soup_opendde_pack.py --protenix <protenix_base_default_v1.0.0.pt> --opendde <opendde.pt> \
+    --esmfold2 <esmfold2 dir> --esmc <esmc-6b dir> --protenix-root <protenix_root> --kalign <kalign> --out soup_opendde_pack.pt
+
+soup_env/bin/python scripts/soup_opendde_pack.py --checkpoint soup_opendde_pack.pt --protenix-root <protenix_root> \
+    --template-mmcif-dir examples/9mnb/mmcif --kalign <kalign> --input examples/9mnb/9mnb.json
+```
+
+`<protenix_root>/common` holds the CCD data, release dates and obsolete-entry list that Protenix and OpenDDE featurise with;
+they are not in the checkpoint. On an 80 GB GPU also pass OpenDDE's `--chunk-thresholds` (see [GPU memory](#gpu-memory)).
+Samples go to `<workdir>/samples/soupfold/opendde/seed_<k>/`.
+
+The environment uses torch 2.11 as esm 3.4.0 requires, with the data stack OpenDDE and Protenix pin, and not the torch 2.7.1
+those two pin. Results agree with the two-step pipeline up to run-to-run variation, not bit for bit: on `examples/9mnb`
+(seed 1) the top sample scores DockQ B-D 0.617 / B-E 0.731 two-step and 0.645 / 0.765 and 0.648 / 0.762 in two pack runs.
+A larger benchmark has not been run with this code path.
+
 ## Outputs
 
 Everything goes under `--workdir` (default `soupfold_out/`):

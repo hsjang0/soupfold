@@ -41,15 +41,39 @@ class _FixedPairformer(nn.Module):
         return self._s, self._z
 
 
+class StopAfterTrunk(Exception):
+    """Raised by capture_trunk(stop=True) once (s, z) are recorded."""
+
+
 @contextlib.contextmanager
-def capture_trunk(model, box):
-    """Record (s, z) as the trunk hands them over. The forward pass continues unchanged."""
+def capture_trunk(model, box, stop=False):
+    """Record (s, z) as the trunk hands them over. The forward pass continues unchanged, or with
+    stop=True is aborted there (raises StopAfterTrunk), skipping diffusion and the confidence head."""
     original = model.get_pairformer_output
 
     def wrapped(*args, **kwargs):
         out = original(*args, **kwargs)
         box["s"], box["z"] = out[1], out[2]
+        if stop:
+            raise StopAfterTrunk
         return out
+
+    model.get_pairformer_output = wrapped
+    try:
+        yield
+    finally:
+        model.get_pairformer_output = original
+
+
+@contextlib.contextmanager
+def soup_trunk(model, fn):
+    """Replace z by fn(z) as the trunk hands it over. The forward pass continues from there, so the
+    model's own trunk runs once and nothing is stored."""
+    original = model.get_pairformer_output
+
+    def wrapped(*args, **kwargs):
+        s_inputs, s, z = original(*args, **kwargs)
+        return s_inputs, s, fn(z)
 
     model.get_pairformer_output = wrapped
     try:
