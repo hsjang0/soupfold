@@ -144,16 +144,25 @@ uv pip install --python soup_env/bin/python --index-strategy unsafe-best-match -
 uv pip install --python soup_env/bin/python --index-strategy unsafe-best-match \
     --extra-index-url https://download.pytorch.org/whl/cu128 -e third_party/esm -r requirements_pack.txt
 
-# once: bundle the upstream weights into one file (18 GB, with ESMC-6B in bf16 as it runs)
-soup_env/bin/python scripts/build_soup_opendde_pack.py --protenix <protenix_base_default_v1.0.0.pt> --opendde <opendde.pt> \
-    --esmfold2 <esmfold2 dir> --esmc <esmc-6b dir> --protenix-root <protenix_root> --kalign <kalign> --out soup_opendde_pack.pt
+# the checkpoint (18 GB, with ESMC-6B in bf16 as it runs)
+soup_env/bin/hf download hyosoon0/soup-opendde-pack soup_opendde_pack.pt --local-dir .
 
 soup_env/bin/python scripts/soup_opendde_pack.py --checkpoint soup_opendde_pack.pt --protenix-root <protenix_root> \
     --template-mmcif-dir examples/9mnb/mmcif --kalign <kalign> --input examples/9mnb/9mnb.json
 ```
 
+The checkpoint is at [hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack). Its
+[`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md) gives each part's license, upstream
+revision and file hash, and every change from the originals. To build the same bundle from the upstream weights instead:
+
+```bash
+soup_env/bin/python scripts/build_soup_opendde_pack.py --protenix <protenix_base_default_v1.0.0.pt> --opendde <opendde.pt> \
+    --esmfold2 <esmfold2 dir> --esmc <esmc-6b dir> --protenix-root <protenix_root> --kalign <kalign> --out soup_opendde_pack.pt
+```
+
 `<protenix_root>/common` holds the CCD data, release dates and obsolete-entry list that Protenix and OpenDDE featurise with;
-they are not in the checkpoint. On an 80 GB GPU also pass OpenDDE's `--chunk-thresholds` (see [GPU memory](#gpu-memory)).
+they are not in the checkpoint. OpenDDE's [Hugging Face repository](https://huggingface.co/aurekaresearch/OpenDDE/tree/main/common)
+has them under `common/`. On an 80 GB GPU also pass OpenDDE's `--chunk-thresholds` (see [GPU memory](#gpu-memory)).
 Samples go to `<workdir>/samples/soupfold/opendde/seed_<k>/`.
 
 The environment uses torch 2.11 as esm 3.4.0 requires, with the data stack OpenDDE and Protenix pin, and not the torch 2.7.1
@@ -244,6 +253,11 @@ train a model similar to AlphaFold3. It trains only representation transfer netw
 AlphaFold3 representations. We follow the
 [AlphaFold 3 Output Terms of Use](https://github.com/google-deepmind/alphafold3/blob/main/OUTPUT_TERMS_OF_USE.md)
 and [CC BY-NC-SA 4.0](https://github.com/google-deepmind/alphafold3/blob/main/LICENSE).
+
+The `soup-opendde-pack` checkpoint redistributes the OpenDDE, Protenix, ESMFold2 and ESMC-6B parameters, each under its own
+license above, including the Biohub Acceptable Use Policy for ESMC-6B. It contains no AlphaFold3 parameters and does not take
+AlphaFold3 representations, so the AlphaFold3 terms above do not reach it through this model. See its
+[`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md).
 
 **Peer selection.** Without AlphaFold3, SoupFold still improves over the anchor alone. The table gives FoldBench success
 rates (%, DockQ above each threshold, per interface) with ESMFold2 as the anchor and different peers:
