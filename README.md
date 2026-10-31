@@ -133,7 +133,7 @@ several seeds. We rank samples by the anchor's own confidence.
 This branch adds `SoupOpenDDE` (`soupfold/pack.py`): OpenDDE as the anchor, ESMFold2 and Protenix as peers, and the two maps
 as one `nn.Module`, saved as one checkpoint and run in one Python environment. There is no standalone step and no
 representation is written: the peers' trunks and OpenDDE's trunk run in one process, z is mixed in memory, and OpenDDE
-goes on to diffusion and confidence. The other three models wait in CPU memory while one runs.
+goes on to diffusion and confidence. The other two models wait in CPU memory while one runs.
 
 ```bash
 git clone --recursive -b soup-opendde-pack https://github.com/hsjang0/soupfold.git && cd soupfold
