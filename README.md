@@ -21,7 +21,7 @@ from `mmcif/` next to it.
 |---|---|
 | `--seeds 1-5` | seeds to run, default 1 |
 | `--workdir <dir>` | output directory, default `soupfold_out` |
-| `--chunk-thresholds '{"1024":64,"2048":16}'` | smaller trunk chunks for GPUs under about 180 GB, same numerics |
+| `--chunk-thresholds '{"1024":64,"2048":16}'` | OpenDDE trunk chunk sizes by token count; the default fits an 80 GB GPU, smaller chunks use less memory |
 | `--checkpoint`, `--protenix-root`, `--template-mmcif-dir` | use local files instead of the defaults |
 
 ## License

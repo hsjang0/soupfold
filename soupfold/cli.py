@@ -10,6 +10,7 @@ import os
 
 CHECKPOINT = ("hyosoon0/soup-opendde-pack", "soup_opendde_pack.pt")
 COMMON = ("aurekaresearch/OpenDDE", "eddd563ce96571f784012edd8f045181c8f8627d")  # common/: CCD data, release dates
+CHUNKS = '{"512":128,"1024":64,"1536":32,"2048":16,"3072":8,"4096":4}'  # OpenDDE trunk chunks that fit an 80 GB GPU
 
 
 def seeds(spec):
@@ -28,9 +29,10 @@ def main():
     ap.add_argument("--checkpoint", help=f"default: {CHECKPOINT[0]} on Hugging Face")
     ap.add_argument("--protenix-root", help=f"holds common/ (CCD data, release dates); default: {COMMON[0]} on Hugging Face")
     ap.add_argument("--template-mmcif-dir", help="default: mmcif/ next to the first input, if there is one")
-    ap.add_argument("--chunk-thresholds", help='OpenDDE trunk chunk sizes by token count, e.g. \'{"1024":64,"2048":16}\'')
+    ap.add_argument("--chunk-thresholds", default=CHUNKS, help=f"OpenDDE trunk chunk sizes by token count; default: {CHUNKS}")
     a = ap.parse_args()
 
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     import torch
     if not torch.cuda.is_available():
         raise SystemExit("soupfold-pack needs an NVIDIA GPU: torch sees none.")

@@ -17,6 +17,7 @@ import tempfile
 
 import numpy as np
 import torch
+from rdkit import RDLogger
 from torch import nn
 
 from . import inputs, maps as M, mix, runners as R, tokens
@@ -29,6 +30,7 @@ from .models.esm.models.hub import init_empty_weights
 PEERS = ("protenix", "esmfold2")
 
 os.environ.setdefault("LAYERNORM_TYPE", "torch")
+RDLogger.DisableLog("rdApp.*")                          # one version warning for each molecule in the bundled CCD
 
 
 def _empty_cache():
