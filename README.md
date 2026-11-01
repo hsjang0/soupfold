@@ -135,8 +135,7 @@ branch runs OpenDDE as the anchor with ESMFold2 and Protenix as peers as one mod
 environment. There is no standalone step and no representation is written. The checkpoint is at
 [hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack) (18 GB), with each part's license, source and
 changes in its [`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md). It does not use AlphaFold3.
-On CoFold Arena (422 antibody-antigen targets, seed 1, no templates, ESMFold2 pairing its MSA by taxonomy) the mean DockQ is
-0.396 with this model and 0.395 with the multi-step pipeline. Installation and usage are in that branch's README.
+Installation and usage are in that branch's README.
 
 ## Outputs
 
