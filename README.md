@@ -24,11 +24,6 @@ from `mmcif/` next to it.
 | `--chunk-thresholds '{"1024":64,"2048":16}'` | smaller trunk chunks for GPUs under about 180 GB, same numerics |
 | `--checkpoint`, `--protenix-root`, `--template-mmcif-dir` | use local files instead of the defaults |
 
-## Result
-
-CoFold Arena, 422 antibody-antigen targets, seed 1, no templates, ESMFold2 pairing its MSA by taxonomy: mean DockQ 0.396, against
-0.395 for the multi-step pipeline (paired difference +0.001, 95% CI -0.008 to +0.011) and 0.378 for OpenDDE alone.
-
 ## License
 
 The model code in `soupfold/models/` comes from Protenix, OpenDDE and esm, under Apache-2.0 and MIT
