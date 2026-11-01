@@ -3,6 +3,7 @@ import copy
 import glob
 import json
 import os
+import re
 import shutil
 
 import torch
@@ -83,6 +84,9 @@ def chain_ids():
         n += 1
 
 
+_TAXID = re.compile(r"\bTaxID=(-?\d+)|^>UniRef100_[^_\s]+_(\d+)")
+
+
 def _a3m(path):
     hdr, buf = None, []
     for line in open(path):
@@ -96,8 +100,30 @@ def _a3m(path):
         yield "".join(buf)
 
 
+def _taxonomy_msa(unpaired, out):
+    """The a3m as ESMFold2 reads it if its headers name the taxonomy (key=<id>, TaxID=<id> or UniRef100_<acc>_<id>), else None."""
+    lines = open(unpaired).readlines()
+    headers = [line for line in lines if line.startswith(">")]
+    if any(re.search(r"\bkey=-?\d+", h) for h in headers):
+        return MSA.from_a3m(unpaired)
+    if not any(_TAXID.search(h) for h in headers):
+        return None
+    with open(out, "w") as f:
+        for line in lines:
+            if line.startswith(">"):
+                m = _TAXID.search(line)
+                line = f"{line.rstrip()} key={(m.group(1) or m.group(2)) if m else -1}\n"
+            f.write(line)
+    return MSA.from_a3m(out)
+
+
 def keyed_msa(paired, unpaired, out, cap=2048):
-    """Paired rows keyed by row index (so rows pair across chains), unpaired rows key=-1."""
+    """Taxonomy in the headers of a lone a3m pairs rows across chains. Otherwise paired rows are keyed by row index (so rows
+    pair across chains) and unpaired rows key=-1."""
+    if unpaired and os.path.exists(unpaired) and (not paired or os.path.realpath(paired) == os.path.realpath(unpaired)):
+        msa = _taxonomy_msa(unpaired, out)
+        if msa is not None:
+            return msa
     query = None
     with open(out, "w") as f:
         for i, seq in enumerate(_a3m(paired) if paired and os.path.exists(paired) else []):

@@ -17,6 +17,9 @@ Hugging Face. Samples go to `soupfold_out/samples/soupfold/opendde/seed_1/`: `<s
 The input is a Protenix-format JSON, as in the [main branch](https://github.com/hsjang0/soupfold#input). Template structures are read
 from `mmcif/` next to it.
 
+If a chain has one a3m (no separate paired file) with taxonomy in its headers (`key=<id>`, `TaxID=<id>` or `UniRef100_<acc>_<id>`),
+ESMFold2 pairs by that taxonomy.
+
 | option | |
 |---|---|
 | `--seeds 1-5` | seeds to run, default 1 |
