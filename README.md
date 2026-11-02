@@ -14,8 +14,9 @@
 </p>
 
 > [!TIP]
-> **Easiest way to run:** the [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack) branch needs
-> one Python environment, one checkpoint and three commands. See [Easiest way to run](#easiest-way-to-run).
+> **Easiest way to run (license free):** the [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack)
+> branch needs one Python environment, one checkpoint and three commands, with no AlphaFold3 parameters to request. See
+> [below](#easiest-way-to-run-license-free).
 
 ## Abstract
 
@@ -81,7 +82,7 @@ relative to the JSON file. `examples/9mnb/` is a ready-to-run antibody example f
   ...]}]
 ```
 
-## Easiest way to run
+## Easiest way to run (license free)
 
 The [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack) branch runs SoupFold as one model, from
 one checkpoint in one Python environment, with OpenDDE as the anchor and ESMFold2 and Protenix as peers. No model has to be
@@ -93,10 +94,13 @@ uv venv --python 3.12 && uv pip install -e .
 .venv/bin/soupfold-pack --input examples/9mnb/9mnb.json
 ```
 
-Everything runs in one process and no representation is written to disk. It does not use AlphaFold3; for other anchors or peers, use the
-full pipeline below. The checkpoint is at [hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack)
-(18 GB), with each part's license, source and changes in its
-[`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md). Options are in that branch's README.
+License free here means no AlphaFold3 parameters to request and no AlphaFold3 terms. The bundled models stay under their own
+licenses (Apache-2.0 and MIT, plus the Biohub Acceptable Use Policy for ESMC-6B), listed with each part's source and changes in
+[`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md).
+
+Everything runs in one process and no representation is written to disk. For other anchors or peers, use the full pipeline
+below. The checkpoint is at [hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack) (18 GB). Options are
+in that branch's README.
 
 ## Installation
 
