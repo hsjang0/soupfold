@@ -27,7 +27,7 @@ ESMFold2 pairs by that taxonomy.
 | `--chunk-thresholds '{"1024":64,"2048":16}'` | OpenDDE trunk chunk sizes by token count; the default fits an 80 GB GPU, smaller chunks use less memory |
 | `--checkpoint`, `--protenix-root`, `--template-mmcif-dir` | use local files instead of the defaults |
 
-## CoFold Arena
+## Performance
 
 ![Mean DockQ and success rates on CoFold Arena, SoupFold and the leaderboard models](assets/cofold_arena.png)
 
