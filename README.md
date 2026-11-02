@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2609.15552"><img src="https://img.shields.io/badge/arXiv-2609.15552-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://huggingface.co/hyosoon0/soup-opendde-pack"><img src="https://img.shields.io/badge/Hugging%20Face-soup--opendde--pack-ffd21e.svg" alt="Hugging Face"></a>
 </p>
 
 <p align="center">
