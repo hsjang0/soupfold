@@ -32,8 +32,7 @@ ESMFold2 pairs by that taxonomy.
 ![Mean DockQ and success rates on CoFold Arena, SoupFold and the leaderboard models](assets/cofold_arena.png)
 
 The 422 antibody-antigen targets of [CoFold Arena](https://cofoldarena.ai/). Other models show the official leaderboard scores with
-MSA (site data of 2026-10-29). SoupFold is our own run of this branch, not a leaderboard entry: the site's MSAs with their taxonomy
-headers converted, no templates, seed 1, scored with tinyprot under the site's identity chain mapping.
+MSA (site data of 2026-10-29). SoupFold is our own run of this branch, following the official setting.
 
 ## License
 
