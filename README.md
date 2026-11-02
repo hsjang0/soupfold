@@ -12,6 +12,10 @@
   <a href="https://sungsoo-ahn.github.io/">Sungsoo Ahn</a>
 </p>
 
+> [!TIP]
+> **Easiest way to run:** the [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack) branch needs
+> one Python environment, one checkpoint and three commands. See [Easiest way to run](#easiest-way-to-run).
+
 ## Abstract
 
 > Co-folding models such as AlphaFold3, Protenix, ESMFold2, and OpenDDE have advanced rapidly, yet no single model consistently performs best across all biomolecular complexes. In this paper, we show that their pair representations encode complementary information that can be transferred across models to improve structure prediction. We introduce SoupFold, which combines pair representations from multiple co-folding models in a common representation space and generates structures from the combined representation. Importantly, SoupFold does not retrain the co-folding models and learns only simple mappings to transfer representations across models. We evaluate SoupFold on antibody-antigen, protein-protein, protein-ligand, molecular glue, GPCR, and oligomeric complex prediction using AlphaFold3, Protenix, ESMFold2, and OpenDDE. By combining representations across models, SoupFold improves over individual co-folding models across the considered benchmarks.
@@ -76,6 +80,23 @@ relative to the JSON file. `examples/9mnb/` is a ready-to-run antibody example f
   ...]}]
 ```
 
+## Easiest way to run
+
+The [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack) branch runs SoupFold as one model, from
+one checkpoint in one Python environment, with OpenDDE as the anchor and ESMFold2 and Protenix as peers. No model has to be
+installed separately, and the checkpoint downloads on the first run:
+
+```bash
+git clone -b soup-opendde-pack https://github.com/hsjang0/soupfold.git && cd soupfold
+uv venv --python 3.12 && uv pip install -e .
+.venv/bin/soupfold-pack --input examples/9mnb/9mnb.json
+```
+
+Everything runs in one process and no representation is written to disk. It does not use AlphaFold3; for other anchors or peers, use the
+full pipeline below. The checkpoint is at [hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack)
+(18 GB), with each part's license, source and changes in its
+[`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md). Options are in that branch's README.
+
 ## Installation
 
 ```bash
@@ -127,15 +148,6 @@ You choose what the standalone runs produce:
 
 SoupFold itself always draws 5 samples with the anchor's default steps. Use `--seeds 1-5` for
 several seeds. We rank samples by the anchor's own confidence.
-
-## One model, one checkpoint
-
-The [`soup-opendde-pack`](https://github.com/hsjang0/soupfold/tree/soup-opendde-pack)
-branch runs OpenDDE as the anchor with ESMFold2 and Protenix as peers as one model, from one checkpoint in one Python
-environment. There is no standalone step and no representation is written. The checkpoint is at
-[hyosoon0/soup-opendde-pack](https://huggingface.co/hyosoon0/soup-opendde-pack) (18 GB), with each part's license, source and
-changes in its [`NOTICE.md`](https://huggingface.co/hyosoon0/soup-opendde-pack/blob/main/NOTICE.md). It does not use AlphaFold3.
-Installation and usage are in that branch's README.
 
 ## Outputs
 
